@@ -48,7 +48,7 @@ export function MarketplaceClient({ products }: Props) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Plat, commerce…"
-            className="boma-field rounded-2xl bg-background px-4 py-3 text-foreground"
+            className="boma-field w-full rounded-2xl px-4 py-3 text-foreground"
           />
         </label>
         <label className="flex min-w-[160px] flex-col gap-2 text-sm font-medium">
@@ -58,7 +58,7 @@ export function MarketplaceClient({ products }: Props) {
             onChange={(e) =>
               setType(e.target.value as "all" | VendorType)
             }
-            className="boma-field rounded-2xl bg-background px-4 py-3"
+            className="boma-field w-full rounded-2xl px-4 py-3 text-foreground"
           >
             <option value="all">Tous</option>
             <option value="restaurant">Restaurant</option>
