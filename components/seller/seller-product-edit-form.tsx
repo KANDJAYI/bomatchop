@@ -169,14 +169,14 @@ export function SellerProductEditForm({ product, businessType }: Props) {
 
         {(bt === "supermarket" || bt === "boutique") && (
           <SellerDlcFields
-            resetVersion={formKey}
+            key={`dlc-${formKey}-${product.expires_at ?? ""}`}
             initialExpiresAt={product.expires_at}
           />
         )}
 
         {bt === "restaurant" && (
           <SellerRestaurantTimeFields
-            resetVersion={formKey}
+            key={`rt-${formKey}-${product.prepared_at ?? ""}-${product.consume_by ?? ""}`}
             initialPreparedAt={product.prepared_at}
             initialConsumeBy={product.consume_by}
           />

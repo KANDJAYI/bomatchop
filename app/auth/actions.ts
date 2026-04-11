@@ -119,7 +119,8 @@ export async function applyVendorApplication(input: {
   let { error } = await supabase.from("vendors").insert(rowFull);
 
   if (error && isUndefinedColumnError(error.message, "profile_photo_url")) {
-    const { profile_photo_url: _p, ...rowLegacy } = rowFull;
+    const { profile_photo_url: _omitProfilePhoto, ...rowLegacy } = rowFull;
+    void _omitProfilePhoto;
     ({ error } = await supabase.from("vendors").insert(rowLegacy));
   }
 

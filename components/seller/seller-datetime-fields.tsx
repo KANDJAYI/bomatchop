@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 function pad2(n: number) {
   return String(n).padStart(2, "0");
@@ -46,35 +46,25 @@ function mergeLocalDateTime(dateStr: string, timeStr: string) {
   return `${dateStr}T${timePart}`;
 }
 
-type ResetProps = {
-  resetVersion: number;
-  /** Édition : ISO timestamptz depuis la base */
+type DlcProps = {
+  /** Édition : ISO timestamptz depuis la base. Remonter le composant avec une `key` pour réinitialiser (ex. après reset formulaire). */
   initialExpiresAt?: string | null;
 };
 
+function dlcInitialState(initialExpiresAt?: string | null) {
+  const parts = localPartsFromIso(initialExpiresAt);
+  if (parts) return parts;
+  return { date: toDateInputValue(addDays(new Date(), 30)), time: "23:59" };
+}
+
 /** DLC supermarché / boutique : date + heure + raccourcis +14 / +30 / +60 jours */
-export function SellerDlcFields({
-  resetVersion,
-  initialExpiresAt,
-}: ResetProps) {
-  const [date, setDate] = useState(() =>
-    toDateInputValue(addDays(new Date(), 30)),
-  );
-  const [time, setTime] = useState("23:59");
+export function SellerDlcFields({ initialExpiresAt }: DlcProps) {
+  const init = dlcInitialState(initialExpiresAt);
+  const [date, setDate] = useState(init.date);
+  const [time, setTime] = useState(init.time);
 
   const minDlc = addDays(new Date(), 14);
   const minStr = toDateInputValue(minDlc);
-
-  useEffect(() => {
-    const parts = localPartsFromIso(initialExpiresAt);
-    if (parts) {
-      setDate(parts.date);
-      setTime(parts.time);
-      return;
-    }
-    setDate(toDateInputValue(addDays(new Date(), 30)));
-    setTime("23:59");
-  }, [resetVersion, initialExpiresAt]);
 
   function applyPreset(daysFromNow: number) {
     const d = addDays(new Date(), daysFromNow);
@@ -126,45 +116,46 @@ export function SellerDlcFields({
   );
 }
 
-type RestaurantResetProps = ResetProps & {
+type RestaurantProps = {
+  /** Remonter avec une `key` pour réinitialiser (ex. `formKey`). */
   initialPreparedAt?: string | null;
   initialConsumeBy?: string | null;
 };
 
+function restaurantInitialState(
+  initialPreparedAt?: string | null,
+  initialConsumeBy?: string | null,
+) {
+  const prep = localPartsFromIso(initialPreparedAt);
+  const cons = localPartsFromIso(initialConsumeBy);
+  if (prep && cons) {
+    return {
+      prepDate: prep.date,
+      prepTime: prep.time,
+      consumeDate: cons.date,
+      consumeTime: cons.time,
+    };
+  }
+  const n = new Date();
+  const c = addHours(n, 6);
+  return {
+    prepDate: toDateInputValue(n),
+    prepTime: toTimeInputValue(n),
+    consumeDate: toDateInputValue(c),
+    consumeTime: toTimeInputValue(c),
+  };
+}
+
 /** Restaurant : heure de préparation + heure d’expiration (toutes deux obligatoires) */
 export function SellerRestaurantTimeFields({
-  resetVersion,
   initialPreparedAt,
   initialConsumeBy,
-}: RestaurantResetProps) {
-  const [prepDate, setPrepDate] = useState(() =>
-    toDateInputValue(new Date()),
-  );
-  const [prepTime, setPrepTime] = useState(() => toTimeInputValue(new Date()));
-  const [consumeDate, setConsumeDate] = useState(() =>
-    toDateInputValue(addHours(new Date(), 6)),
-  );
-  const [consumeTime, setConsumeTime] = useState(() =>
-    toTimeInputValue(addHours(new Date(), 6)),
-  );
-
-  useEffect(() => {
-    const prep = localPartsFromIso(initialPreparedAt);
-    const cons = localPartsFromIso(initialConsumeBy);
-    if (prep && cons) {
-      setPrepDate(prep.date);
-      setPrepTime(prep.time);
-      setConsumeDate(cons.date);
-      setConsumeTime(cons.time);
-      return;
-    }
-    const n = new Date();
-    const c = addHours(n, 6);
-    setPrepDate(toDateInputValue(n));
-    setPrepTime(toTimeInputValue(n));
-    setConsumeDate(toDateInputValue(c));
-    setConsumeTime(toTimeInputValue(c));
-  }, [resetVersion, initialPreparedAt, initialConsumeBy]);
+}: RestaurantProps) {
+  const init = restaurantInitialState(initialPreparedAt, initialConsumeBy);
+  const [prepDate, setPrepDate] = useState(init.prepDate);
+  const [prepTime, setPrepTime] = useState(init.prepTime);
+  const [consumeDate, setConsumeDate] = useState(init.consumeDate);
+  const [consumeTime, setConsumeTime] = useState(init.consumeTime);
 
   function setConsumeFromHoursAhead(h: number) {
     const c = addHours(new Date(), h);

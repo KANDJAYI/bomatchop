@@ -134,10 +134,10 @@ export function SellerProductCreateForm({
         </div>
 
         {(bt === "supermarket" || bt === "boutique") && (
-          <SellerDlcFields resetVersion={formKey} />
+          <SellerDlcFields key={formKey} />
         )}
 
-        {bt === "restaurant" && <SellerRestaurantTimeFields resetVersion={formKey} />}
+        {bt === "restaurant" && <SellerRestaurantTimeFields key={formKey} />}
 
         {err ? (
           <p className="text-sm font-medium text-red-500" role="alert">
