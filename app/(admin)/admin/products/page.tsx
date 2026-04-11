@@ -14,7 +14,9 @@ export default async function AdminProductsPage() {
 
   const { data, error } = await supabase
     .from("products")
-    .select("id, name, status, price_promo, vendors ( business_name )")
+    .select(
+      "id, name, status, price_promo, image_url, vendors ( business_name )",
+    )
     .order("created_at", { ascending: false })
     .limit(80);
 

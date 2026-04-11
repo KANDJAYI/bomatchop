@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { AdminAnalyticsCharts } from "@/components/admin/admin-analytics-charts";
 import { StatCard } from "@/components/admin/stat-card";
+import { getAdminChartsData } from "@/lib/admin/chart-data";
 import { getAdminDashboardStats } from "@/lib/admin/stats";
 import { labelOrderStatus } from "@/lib/labels-fr";
 import { createClient } from "@/lib/supabase/server";
@@ -8,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   const stats = await getAdminDashboardStats();
+  const charts = await getAdminChartsData();
   const supabase = await createClient();
 
   let pendingSnippet: { id: string; business_name: string; created_at: string }[] =
@@ -74,6 +77,21 @@ export default async function AdminDashboardPage() {
           </div>
         )}
       </section>
+
+      {charts ? (
+        <section className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+              Analyses & tendances
+            </h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Camemberts, courbes et volumes pour suivre commandes, vendeurs et
+              utilisateurs.
+            </p>
+          </div>
+          <AdminAnalyticsCharts data={charts} />
+        </section>
+      ) : null}
 
       <div className="grid gap-8 lg:grid-cols-2">
         <section className="admin-panel rounded-2xl bg-white p-6 shadow-sm dark:bg-[#12161c]">

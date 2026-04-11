@@ -410,6 +410,52 @@ export async function adminUpdateOrderStatus(
   if (error) return { error: error.message };
   revalidatePath("/admin");
   revalidatePath("/admin/orders");
+  revalidatePath("/marketplace");
+  revalidatePath("/dashboard");
+  return { ok: true as const };
+}
+
+const vendorOrderActionStatuses = [
+  "preparing",
+  "ready",
+  "completed",
+  "cancelled",
+] as const;
+
+export type VendorOrderActionStatus =
+  (typeof vendorOrderActionStatuses)[number];
+
+/** Fait avancer une commande (commerce unique) — voir `vendor_update_order_status`. */
+export async function vendorUpdateOrderStatusAction(
+  orderId: string,
+  status: VendorOrderActionStatus,
+) {
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase non configuré." };
+  if (!vendorOrderActionStatuses.includes(status)) {
+    return { error: "Statut invalide." };
+  }
+  const { error } = await supabase.rpc("vendor_update_order_status", {
+    p_order_id: orderId,
+    p_new_status: status,
+  });
+  if (error) {
+    const msg = error.message ?? "";
+    if (
+      msg.includes("vendor_update_order_status") &&
+      (msg.includes("does not exist") || msg.includes("n'existe pas"))
+    ) {
+      return {
+        error:
+          "Migration manquante : exécutez supabase/migrations/20260412100000_vendor_order_status.sql",
+      };
+    }
+    return { error: msg };
+  }
+  revalidatePath("/seller/orders");
+  revalidatePath("/seller");
+  revalidatePath("/marketplace");
+  revalidatePath("/dashboard");
   return { ok: true as const };
 }
 
@@ -426,6 +472,10 @@ export async function finalizeCheckoutAction(input: {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Connectez-vous pour commander." };
+
+  if (!input.items?.length) {
+    return { error: "Panier vide." };
+  }
 
   const { data: blocked, error: blockErr } = await supabase.rpc(
     "is_my_checkout_blocked",
@@ -462,6 +512,8 @@ export async function finalizeCheckoutAction(input: {
   if (error) return { error: error.message };
 
   revalidatePath("/dashboard");
+  revalidatePath("/seller/orders");
+  revalidatePath("/marketplace");
   return { ok: true as const, orderId: orderId as string };
 }
 

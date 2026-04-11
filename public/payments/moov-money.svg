@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 52" role="img" aria-label="Moov Money">
+  <defs>
+    <linearGradient id="mv" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00B4E6"/>
+      <stop offset="100%" stop-color="#0077B6"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="52" rx="10" fill="url(#mv)"/>
+  <circle cx="30" cy="26" r="14" fill="#fff" opacity="0.2"/>
+  <text x="30" y="32" text-anchor="middle" fill="#fff" font-family="Arial Black, system-ui, sans-serif" font-size="16" font-weight="900">M</text>
+  <text x="118" y="22" fill="#fff" font-family="system-ui, Segoe UI, sans-serif" font-size="9.5" font-weight="700" letter-spacing="0.14em" opacity="0.95">MOBILE MONEY</text>
+  <text x="118" y="38" fill="#fff" font-family="system-ui, Segoe UI, sans-serif" font-size="15" font-weight="800">Moov Money</text>
+</svg>

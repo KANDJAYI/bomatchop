@@ -3,13 +3,25 @@ import { redirect } from "next/navigation";
 import { ButtonLink } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { labelAppRole } from "@/lib/labels-fr";
+import { labelAppRole, labelOrderStatus } from "@/lib/labels-fr";
 import { formatXAF } from "@/lib/mock-products";
 import type { OrderSummary } from "@/lib/types";
 
 const MOCK_ORDERS: OrderSummary[] = [
-  { id: "BO-2401", date: "2026-04-02", total: 12_400, itemCount: 3 },
-  { id: "BO-2398", date: "2026-03-28", total: 8_900, itemCount: 1 },
+  {
+    id: "BO-2401",
+    date: "2026-04-02",
+    total: 12_400,
+    itemCount: 3,
+    status: "completed",
+  },
+  {
+    id: "BO-2398",
+    date: "2026-03-28",
+    total: 8_900,
+    itemCount: 1,
+    status: "preparing",
+  },
 ];
 
 export const dynamic = "force-dynamic";
@@ -53,7 +65,7 @@ export default async function DashboardPage() {
 
   const { data: orderRows } = await supabase
     .from("orders")
-    .select("id, created_at, total_amount, order_items ( id )")
+    .select("id, created_at, total_amount, status, order_items ( id )")
     .eq("customer_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -64,6 +76,7 @@ export default async function DashboardPage() {
       date: o.created_at as string,
       total: Number(o.total_amount),
       itemCount: Array.isArray(items) ? items.length : 0,
+      status: String(o.status ?? "pending"),
     };
   });
 
@@ -149,6 +162,9 @@ function DashboardBody({
                     </p>
                   </div>
                   <div className="text-right">
+                    <span className="mb-1 inline-block rounded-full bg-boma-blue/10 px-2.5 py-0.5 text-[11px] font-semibold text-boma-blue">
+                      {labelOrderStatus(o.status)}
+                    </span>
                     <p className="font-bold text-boma-blue">{formatXAF(o.total)}</p>
                     <p className="text-xs text-muted">
                       {o.itemCount} article{o.itemCount > 1 ? "s" : ""}

@@ -25,6 +25,8 @@ export type OrderSummary = {
   date: string;
   total: number;
   itemCount: number;
+  /** Statut BOMA (pending, paid, preparing, …) */
+  status: string;
 };
 
 export type ProfileRole = "client" | "vendor" | "admin";

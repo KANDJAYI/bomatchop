@@ -102,6 +102,41 @@ export function CartPageClient() {
           <span>Montant total</span>
           <span className="text-boma-blue">{formatXAF(total)}</span>
         </div>
+        <p className="mt-4 text-xs font-medium text-muted">
+          Paiement à la livraison ou mobile money :
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="relative inline-block h-10 w-[120px] overflow-hidden rounded-md opacity-90">
+            <Image
+              src="/payments/cash-delivery.svg"
+              alt="Paiement à la livraison"
+              width={240}
+              height={52}
+              className="h-10 w-auto object-contain object-left"
+              unoptimized
+            />
+          </span>
+          <span className="relative inline-block h-10 w-[120px] overflow-hidden rounded-md">
+            <Image
+              src="/payments/airtel-money.svg"
+              alt="Airtel Money"
+              width={240}
+              height={52}
+              className="h-10 w-auto object-contain object-left"
+              unoptimized
+            />
+          </span>
+          <span className="relative inline-block h-10 w-[120px] overflow-hidden rounded-md">
+            <Image
+              src="/payments/moov-money.svg"
+              alt="Moov Money"
+              width={240}
+              height={52}
+              className="h-10 w-auto object-contain object-left"
+              unoptimized
+            />
+          </span>
+        </div>
         <ButtonLink href="/checkout" variant="primary" className="mt-6 w-full">
           Passer commande
         </ButtonLink>

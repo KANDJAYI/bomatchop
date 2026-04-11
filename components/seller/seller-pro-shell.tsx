@@ -23,6 +23,7 @@ type Props = {
 const nav = (approved: boolean) =>
   [
     { href: "/seller", label: "Tableau de bord", icon: IconLayout, show: true },
+    { href: "/seller/orders", label: "Commandes", icon: IconCart, show: approved },
     { href: "/seller/products", label: "Mes produits", icon: IconBox, show: approved },
     { href: "/seller/products/new", label: "Nouvelle offre", icon: IconPlus, show: approved },
     { href: "/seller/messages", label: "Messages BOMA", icon: IconMail, show: approved },
@@ -36,6 +37,7 @@ function titleForPath(pathname: string): string {
     return "Modifier l’offre";
   }
   if (pathname === "/seller/products") return "Mes produits";
+  if (pathname === "/seller/orders") return "Commandes";
   if (pathname === "/seller/messages") return "Messages";
   if (pathname === "/seller/account") return "Mon compte";
   return "Espace vendeur";
@@ -200,6 +202,14 @@ function IconUser({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    </svg>
+  );
+}
+
+function IconCart({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
     </svg>
   );
 }

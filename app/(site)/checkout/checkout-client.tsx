@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
@@ -12,6 +13,32 @@ import { useToast } from "@/context/toast-context";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { formatXAF } from "@/lib/mock-products";
 import type { PaymentMethod } from "@/lib/types";
+
+const PAYMENT_CHOICES: {
+  value: PaymentMethod;
+  label: string;
+  description: string;
+  logoSrc: string;
+}[] = [
+  {
+    value: "cash_on_delivery",
+    label: "À la livraison",
+    description: "Réglez en espèces ou par mobile money au retrait.",
+    logoSrc: "/payments/cash-delivery.svg",
+  },
+  {
+    value: "airtel_money",
+    label: "Airtel Money",
+    description: "Paiement via le compte Airtel Money du numéro indiqué.",
+    logoSrc: "/payments/airtel-money.svg",
+  },
+  {
+    value: "moov_money",
+    label: "Moov Money",
+    description: "Paiement via le compte Moov Money du numéro indiqué.",
+    logoSrc: "/payments/moov-money.svg",
+  },
+];
 
 export function CheckoutClient() {
   const router = useRouter();
@@ -140,18 +167,56 @@ export function CheckoutClient() {
             <span className="text-xs font-medium text-red-500">{errors.phone}</span>
           )}
         </label>
-        <label className="flex flex-col gap-2 text-sm font-medium">
-          Mode de paiement
-          <select
-            value={payment}
-            onChange={(e) => setPayment(e.target.value as PaymentMethod)}
-            className="boma-field rounded-2xl bg-background px-4 py-3"
-          >
-            <option value="cash_on_delivery">Paiement à la livraison</option>
-            <option value="airtel_money">Airtel Money</option>
-            <option value="moov_money">Moov Money</option>
-          </select>
-        </label>
+        <fieldset className="space-y-3">
+          <legend className="text-sm font-medium text-foreground">
+            Mode de paiement
+          </legend>
+          <p className="text-xs text-muted">
+            Choisissez comment vous souhaitez régler — logos Airtel Money et Moov
+            Money pour repérer vite les options mobile money.
+          </p>
+          <div className="grid gap-3">
+            {PAYMENT_CHOICES.map((opt) => {
+              const selected = payment === opt.value;
+              return (
+                <label
+                  key={opt.value}
+                  className={`flex cursor-pointer flex-col gap-2 rounded-2xl p-3 transition-all ${
+                    selected
+                      ? "bg-boma-blue/[0.08] ring-2 ring-boma-blue ring-offset-2 ring-offset-card dark:ring-offset-card"
+                      : "bg-foreground/[0.03] ring-2 ring-transparent hover:bg-foreground/[0.05]"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="payment_method"
+                      value={opt.value}
+                      checked={selected}
+                      onChange={() => setPayment(opt.value)}
+                      className="sr-only"
+                      aria-label={opt.label}
+                    />
+                    <span className="relative block h-[52px] w-full max-w-[240px] overflow-hidden rounded-lg">
+                      <Image
+                        src={opt.logoSrc}
+                        alt=""
+                        width={240}
+                        height={52}
+                        className="h-[52px] w-auto max-w-full object-contain object-left"
+                        unoptimized
+                      />
+                    </span>
+                  </div>
+                  <span className="text-xs font-semibold text-foreground">
+                    {opt.label}
+                  </span>
+                  <span className="text-xs text-muted">{opt.description}</span>
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
         <div className="flex flex-wrap gap-3">
           <Button type="submit" variant="primary" disabled={loading}>
             {loading ? "Validation…" : "Confirmer la commande"}

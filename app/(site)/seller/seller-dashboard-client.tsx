@@ -93,6 +93,10 @@ export function SellerDashboardClient({
         Vue d’ensemble de votre activité — gérez le détail dans{" "}
         <Link href="/seller/products" className="font-medium text-boma-blue hover:underline">
           Mes produits
+        </Link>{" "}
+        et traitez les{" "}
+        <Link href="/seller/orders" className="font-medium text-boma-blue hover:underline">
+          commandes clients
         </Link>
         .
       </p>
@@ -120,12 +124,18 @@ export function SellerDashboardClient({
         </p>
       ) : null}
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <QuickCard
           href="/seller/products/new"
           title="Nouvelle offre"
           desc="Publier avec photo et prix catalogue"
           accent="from-boma-blue/20 to-boma-forest/10"
+        />
+        <QuickCard
+          href="/seller/orders"
+          title="Commandes"
+          desc="Accepter, préparer, prêt à retirer"
+          accent="from-boma-spectrum-green/18 to-boma-blue/12"
         />
         <QuickCard
           href="/seller/products"
