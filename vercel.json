@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/restaurant-midnight-purge",
+      "schedule": "0 23 * * *"
+    }
+  ]
+}

@@ -1,0 +1,189 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import {
+  finalizeCheckoutAction,
+  recordCheckoutAbandonAction,
+} from "@/app/auth/actions";
+import { Button, ButtonLink } from "@/components/ui/button";
+import { useCart } from "@/context/cart-context";
+import { useToast } from "@/context/toast-context";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { formatXAF } from "@/lib/mock-products";
+import type { PaymentMethod } from "@/lib/types";
+
+export function CheckoutClient() {
+  const router = useRouter();
+  const { lines, total, clear, itemCount } = useCart();
+  const { showToast } = useToast();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [payment, setPayment] = useState<PaymentMethod>("cash_on_delivery");
+  const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
+  const [loading, setLoading] = useState(false);
+
+  if (lines.length === 0) {
+    return (
+      <div className="mx-auto flex max-w-lg flex-1 flex-col items-center justify-center gap-6 px-4 py-24 text-center">
+        <h1 className="text-2xl font-semibold">Panier vide</h1>
+        <p className="text-muted">
+          Ajoutez des produits avant de finaliser votre commande.
+        </p>
+        <ButtonLink href="/marketplace">Voir les offres</ButtonLink>
+      </div>
+    );
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const next: typeof errors = {};
+    if (name.trim().length < 2) next.name = "Indiquez votre nom complet.";
+    if (phone.trim().length < 8) next.phone = "Numéro de téléphone invalide.";
+    setErrors(next);
+    if (Object.keys(next).length > 0) {
+      showToast("Vérifiez le formulaire", "error");
+      return;
+    }
+
+    if (!isSupabaseConfigured()) {
+      clear();
+      showToast("Commande enregistrée (mode démo sans Supabase)", "success");
+      router.push("/dashboard");
+      return;
+    }
+
+    setLoading(true);
+    const r = await finalizeCheckoutAction({
+      fullName: name.trim(),
+      phone: phone.trim(),
+      paymentMethod: payment,
+      items: lines.map((l) => ({
+        product_id: l.product.id,
+        quantity: l.quantity,
+      })),
+    });
+    setLoading(false);
+
+    if (r.error) {
+      showToast(r.error, "error");
+      return;
+    }
+
+    clear();
+    showToast("Commande confirmée", "success");
+    router.push("/dashboard");
+  }
+
+  async function abandon() {
+    if (!isSupabaseConfigured()) {
+      showToast("Panier laissé (démo)", "info");
+      router.push("/marketplace");
+      return;
+    }
+    const r = await recordCheckoutAbandonAction();
+    if ("error" in r && r.error) {
+      showToast(r.error, "error");
+      return;
+    }
+    const data = "data" in r ? r.data : null;
+    if (data && typeof data === "object" && "level" in data) {
+      const level = (data as { level?: string }).level;
+      if (level === "warning") {
+        showToast("Abandon enregistré — évitez de répéter trop souvent.", "info");
+      }
+    } else {
+      showToast("Abandon enregistré", "info");
+    }
+    router.push("/marketplace");
+  }
+
+  return (
+    <div className="mx-auto grid w-full max-w-6xl flex-1 gap-10 px-4 py-10 sm:px-6 lg:grid-cols-5">
+      <form
+        onSubmit={submit}
+        className="boma-panel boma-panel--glow lg:col-span-3 space-y-6 rounded-3xl bg-card p-6 shadow-sm"
+      >
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Finaliser la commande
+        </h1>
+        <p className="text-sm text-muted">
+          Paiement à la livraison ou mobile money (Airtel / Moov). Les montants
+          sont recalculés côté serveur.
+        </p>
+        <label className="flex flex-col gap-2 text-sm font-medium">
+          Nom complet
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className={`boma-field rounded-2xl bg-background px-4 py-3 ${
+              errors.name ? "boma-field-error" : ""
+            }`}
+            autoComplete="name"
+          />
+          {errors.name && (
+            <span className="text-xs font-medium text-red-500">{errors.name}</span>
+          )}
+        </label>
+        <label className="flex flex-col gap-2 text-sm font-medium">
+          Téléphone
+          <input
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className={`boma-field rounded-2xl bg-background px-4 py-3 ${
+              errors.phone ? "boma-field-error" : ""
+            }`}
+            inputMode="tel"
+            autoComplete="tel"
+          />
+          {errors.phone && (
+            <span className="text-xs font-medium text-red-500">{errors.phone}</span>
+          )}
+        </label>
+        <label className="flex flex-col gap-2 text-sm font-medium">
+          Mode de paiement
+          <select
+            value={payment}
+            onChange={(e) => setPayment(e.target.value as PaymentMethod)}
+            className="boma-field rounded-2xl bg-background px-4 py-3"
+          >
+            <option value="cash_on_delivery">Paiement à la livraison</option>
+            <option value="airtel_money">Airtel Money</option>
+            <option value="moov_money">Moov Money</option>
+          </select>
+        </label>
+        <div className="flex flex-wrap gap-3">
+          <Button type="submit" variant="primary" disabled={loading}>
+            {loading ? "Validation…" : "Confirmer la commande"}
+          </Button>
+          <Button type="button" variant="secondary" disabled={loading} onClick={abandon}>
+            Abandonner (anti-fraude)
+          </Button>
+        </div>
+      </form>
+      <aside className="lg:col-span-2">
+        <div className="boma-panel boma-panel--glow sticky top-24 space-y-4 rounded-3xl bg-boma-forest/5 p-6 dark:bg-boma-forest/15">
+          <h2 className="text-lg font-semibold">Résumé</h2>
+          <ul className="space-y-2 text-sm text-muted">
+            {lines.map((l) => (
+              <li key={l.product.id} className="flex justify-between gap-2">
+                <span className="truncate">
+                  {l.product.name} × {l.quantity}
+                </span>
+                <span className="shrink-0 font-medium text-foreground">
+                  {formatXAF(l.product.pricePromo * l.quantity)}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div className="pt-4 text-base font-semibold">
+            <div className="flex justify-between">
+              <span>{itemCount} articles</span>
+              <span className="text-boma-blue">{formatXAF(total)}</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  );
+}

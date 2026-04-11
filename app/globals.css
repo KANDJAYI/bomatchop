@@ -1,0 +1,444 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --muted: #64748b;
+  --card: #ffffff;
+  /* Pas de contour : séparation par fond / ombre uniquement */
+  --card-border: transparent;
+  --boma-stroke: transparent;
+  --boma-glow-blue: rgba(0, 123, 255, 0.45);
+  --boma-glow-gold: rgba(228, 184, 42, 0.35);
+  --boma-glow-mix: rgba(0, 123, 255, 0.22);
+  /* Palette BOMA inchangée */
+  --boma-blue: #007bff;
+  --boma-forest: #0b3d2e;
+  --boma-ink: #0a0a0a;
+  /* Vert / jaune / rouge — mélange dynamique (harmonisé au bleu & vert nuit) */
+  --boma-spectrum-green: #0c8f5a;
+  --boma-spectrum-yellow: #e4b82a;
+  --boma-spectrum-red: #d92d3c;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #f8fafc;
+  --muted: #94a3b8;
+  --card: #141414;
+  --card-border: transparent;
+  --boma-stroke: transparent;
+  --boma-glow-blue: rgba(56, 189, 248, 0.4);
+  --boma-glow-gold: rgba(250, 204, 21, 0.28);
+  --boma-glow-mix: rgba(56, 189, 248, 0.18);
+  --boma-spectrum-green: #1aaf72;
+  --boma-spectrum-yellow: #f0cc4a;
+  --boma-spectrum-red: #f05563;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-card-border: var(--card-border);
+  --color-boma-blue: #007bff;
+  --color-boma-forest: #0b3d2e;
+  --color-boma-ink: #0a0a0a;
+  --color-boma-spectrum-green: var(--boma-spectrum-green);
+  --color-boma-spectrum-yellow: var(--boma-spectrum-yellow);
+  --color-boma-spectrum-red: var(--boma-spectrum-red);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --animate-fade-up: fade-up 0.5s ease-out both;
+  --animate-fade-in: fade-in 0.35s ease-out both;
+  --animate-scale-in: scale-in 0.25s ease-out both;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes cart-bump {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.12);
+  }
+}
+
+/* Mélange dynamique vert · jaune · rouge (+ touche bleu BOMA) */
+@keyframes boma-spectrum-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes boma-spectrum-drift {
+  0% {
+    transform: translate(-3%, -2%) scale(1);
+  }
+  50% {
+    transform: translate(4%, 3%) scale(1.06);
+  }
+  100% {
+    transform: translate(-2%, 4%) scale(1.02);
+  }
+}
+
+@keyframes boma-page-ambient {
+  0% {
+    opacity: 0.5;
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    opacity: 0.75;
+    filter: hue-rotate(18deg);
+  }
+  100% {
+    opacity: 0.55;
+    filter: hue-rotate(-12deg);
+  }
+}
+
+@keyframes boma-strip-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+/**
+ * Fine bande vert · jaune · rouge (+ bleu) sous le header
+ */
+.boma-spectrum-strip {
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--boma-spectrum-green),
+    var(--boma-spectrum-yellow),
+    var(--boma-spectrum-red),
+    var(--boma-blue),
+    var(--boma-forest),
+    var(--boma-spectrum-green)
+  );
+  background-size: 200% 100%;
+  animation: boma-strip-flow 10s linear infinite;
+}
+
+/**
+ * Placer en premier enfant d’un conteneur `position: relative; overflow: hidden`
+ */
+.boma-spectrum-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.boma-spectrum-bg::before {
+  content: "";
+  position: absolute;
+  width: 165%;
+  height: 165%;
+  left: -32%;
+  top: -32%;
+  border-radius: 45% 55% 50% 50%;
+  background: conic-gradient(
+    from 0deg,
+    color-mix(in srgb, var(--boma-spectrum-green) 70%, transparent),
+    color-mix(in srgb, var(--boma-spectrum-yellow) 65%, transparent),
+    color-mix(in srgb, var(--boma-spectrum-red) 70%, transparent),
+    color-mix(in srgb, var(--boma-blue) 45%, transparent),
+    color-mix(in srgb, var(--boma-forest) 55%, transparent),
+    color-mix(in srgb, var(--boma-spectrum-green) 70%, transparent)
+  );
+  opacity: 0.38;
+  filter: blur(88px);
+  animation: boma-spectrum-rotate 26s linear infinite;
+}
+
+.dark .boma-spectrum-bg::before {
+  opacity: 0.48;
+}
+
+.boma-spectrum-bg::after {
+  content: "";
+  position: absolute;
+  inset: -15%;
+  background:
+    radial-gradient(
+      circle at 25% 35%,
+      color-mix(in srgb, var(--boma-spectrum-yellow) 42%, transparent),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 78% 28%,
+      color-mix(in srgb, var(--boma-spectrum-red) 38%, transparent),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 55% 85%,
+      color-mix(in srgb, var(--boma-spectrum-green) 45%, transparent),
+      transparent 45%
+    );
+  opacity: 0.55;
+  filter: blur(72px);
+  animation: boma-spectrum-drift 16s ease-in-out infinite;
+  mix-blend-mode: multiply;
+}
+
+.dark .boma-spectrum-bg::after {
+  mix-blend-mode: screen;
+  opacity: 0.35;
+}
+
+/* Variante plus discrète (footer, bandeaux) */
+.boma-spectrum-bg--subtle::before {
+  opacity: 0.2;
+  filter: blur(72px);
+  animation-duration: 34s;
+}
+
+.boma-spectrum-bg--subtle::after {
+  opacity: 0.35;
+  animation-duration: 22s;
+}
+
+.dark .boma-spectrum-bg--subtle::before {
+  opacity: 0.26;
+}
+
+.dark .boma-spectrum-bg--subtle::after {
+  opacity: 0.28;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.55s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+.animate-cart-bump {
+  animation: cart-bump 0.45s ease-out;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  position: relative;
+}
+
+/**
+ * Fond global très léger : le spectre bouge derrière toutes les pages
+ */
+body.boma-body-ambient::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 90% 70% at 10% -10%,
+      color-mix(in srgb, var(--boma-spectrum-green) 18%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 80% 60% at 95% 15%,
+      color-mix(in srgb, var(--boma-spectrum-yellow) 14%, transparent),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 70% 55% at 50% 105%,
+      color-mix(in srgb, var(--boma-spectrum-red) 12%, transparent),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 70% 50%,
+      color-mix(in srgb, var(--boma-blue) 10%, transparent),
+      transparent 45%
+    );
+  animation: boma-page-ambient 22s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boma-spectrum-bg::before,
+  .boma-spectrum-bg::after,
+  body.boma-body-ambient::before,
+  .boma-spectrum-strip {
+    animation: none;
+  }
+
+  .boma-spectrum-bg::before {
+    transform: none;
+  }
+
+  body.boma-body-ambient::before {
+    opacity: 0.6;
+    filter: none;
+  }
+
+  .boma-spectrum-strip {
+    background-position: 50% 50%;
+  }
+}
+
+/**
+ * Cartes : sans bordure, halo bleu / or au survol
+ */
+.boma-panel {
+  border: none;
+  transition:
+    box-shadow 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.22s ease;
+}
+
+.boma-panel--glow:hover {
+  box-shadow:
+    0 14px 40px -12px var(--boma-glow-blue),
+    0 0 56px -16px var(--boma-glow-gold);
+}
+
+.boma-panel--glow:active {
+  transform: scale(0.996);
+  box-shadow:
+    0 10px 32px -10px var(--boma-glow-blue),
+    0 0 40px -12px var(--boma-glow-gold);
+}
+
+/** Sous-cartes / pastilles cliquables (grille accueil, etc.) */
+.boma-tile-glow {
+  border: none;
+  transition: box-shadow 0.32s ease, transform 0.2s ease;
+}
+
+.boma-tile-glow:hover {
+  box-shadow: 0 0 28px -6px var(--boma-glow-blue), 0 0 40px -10px var(--boma-glow-gold);
+}
+
+.boma-tile-glow:active {
+  box-shadow: 0 0 22px -4px var(--boma-glow-blue);
+  transform: scale(0.98);
+}
+
+/**
+ * Champs formulaire : contour discret + lumière au focus / toucher
+ */
+.boma-field {
+  border: none;
+  transition: box-shadow 0.28s ease;
+}
+
+.boma-field:focus {
+  outline: none;
+  box-shadow:
+    0 0 0 3px var(--boma-glow-mix),
+    0 0 28px -4px var(--boma-glow-blue);
+}
+
+.boma-field-error {
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.25) !important;
+}
+
+.boma-field-error:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+}
+
+/* Console admin : halo sans contour */
+.admin-panel {
+  border: none !important;
+  transition:
+    box-shadow 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.22s ease;
+}
+
+.admin-panel:hover {
+  box-shadow:
+    0 12px 36px -12px var(--boma-glow-blue),
+    0 0 48px -14px var(--boma-glow-gold);
+}
+
+.admin-panel:active {
+  box-shadow: 0 8px 28px -10px var(--boma-glow-blue);
+}
+
+/* Premium press + lumière sur contrôles (header, liens, etc.) */
+.pressable {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pressable:hover {
+  box-shadow: 0 0 22px -6px var(--boma-glow-blue), 0 0 36px -12px var(--boma-glow-gold);
+}
+
+.pressable:active {
+  transform: scale(0.97);
+  box-shadow: 0 0 26px -4px var(--boma-glow-blue), 0 0 32px -8px var(--boma-glow-gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boma-panel--glow:hover,
+  .boma-panel--glow:active,
+  .boma-tile-glow:hover,
+  .boma-tile-glow:active,
+  .admin-panel:hover,
+  .admin-panel:active,
+  .pressable:hover,
+  .pressable:active {
+    box-shadow: none;
+    transform: none;
+  }
+
+  .pressable:active {
+    transform: scale(0.98);
+  }
+}
+
+@media (hover: none) {
+  .boma-panel--glow:hover {
+    box-shadow: none;
+    transform: none;
+  }
+}
