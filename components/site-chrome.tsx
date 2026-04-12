@@ -46,7 +46,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
         className={
           sellerWorkspace
             ? "flex h-[100dvh] max-h-[100dvh] min-h-0 flex-1 flex-col overflow-hidden overscroll-none"
-            : "flex min-h-0 flex-1 flex-col pb-[max(7.5rem,calc(6.25rem+env(safe-area-inset-bottom,0px)))] md:pb-0"
+            : "flex min-h-0 flex-1 flex-col pb-[max(8.5rem,calc(7rem+env(safe-area-inset-bottom,0px)))] md:pb-0"
         }
         tabIndex={-1}
       >

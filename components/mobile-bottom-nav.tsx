@@ -15,9 +15,9 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 
 const navBtnClass =
-  "flex min-w-0 flex-1 flex-col items-center justify-center gap-2 py-3.5 text-xs font-semibold leading-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-boma-blue/40";
+  "flex min-w-0 flex-1 flex-col items-center justify-center gap-3 px-0.5 py-4 text-xs font-semibold leading-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-boma-blue/40";
 
-const navIconClass = "h-14 w-14 shrink-0";
+const navIconClass = "block h-[4.25rem] w-[4.25rem] shrink-0";
 
 export function MobileBottomNav() {
   const pathname = usePathname();
