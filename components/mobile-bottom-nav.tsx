@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  faCartShopping,
   faHouse,
   faStore,
   faTags,
@@ -11,17 +10,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useCart } from "@/context/cart-context";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 
 const navBtnClass =
-  "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-semibold leading-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-boma-blue/40";
+  "flex min-w-0 flex-1 flex-col items-center justify-center gap-2 py-3.5 text-xs font-semibold leading-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-boma-blue/40";
+
+const navIconClass = "h-14 w-14 shrink-0";
 
 export function MobileBottomNav() {
   const pathname = usePathname();
-  const { itemCount, bumpKey, openCart } = useCart();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -67,7 +66,7 @@ export function MobileBottomNav() {
       className="fixed bottom-0 left-0 right-0 z-40 border-t border-foreground/[0.08] bg-background/92 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-xl backdrop-saturate-150 md:hidden"
       aria-label="Navigation mobile"
     >
-      <div className="mx-auto flex max-w-lg items-stretch justify-between px-1 pt-0.5">
+      <div className="mx-auto flex max-w-lg items-stretch justify-between gap-0.5 px-2 pt-0.5">
         <Link
           href="/"
           className={`${navBtnClass} ${
@@ -76,7 +75,7 @@ export function MobileBottomNav() {
               : "text-muted hover:text-foreground"
           }`}
         >
-          <FontAwesomeIcon icon={faHouse} className="h-5 w-5 shrink-0" aria-hidden />
+          <FontAwesomeIcon icon={faHouse} className={navIconClass} aria-hidden />
           <span>Accueil</span>
         </Link>
         <Link
@@ -87,7 +86,7 @@ export function MobileBottomNav() {
               : "text-muted hover:text-foreground"
           }`}
         >
-          <FontAwesomeIcon icon={faStore} className="h-5 w-5 shrink-0" aria-hidden />
+          <FontAwesomeIcon icon={faStore} className={navIconClass} aria-hidden />
           <span>Marché</span>
         </Link>
         <Link
@@ -98,7 +97,7 @@ export function MobileBottomNav() {
               : "text-muted hover:text-foreground"
           }`}
         >
-          <FontAwesomeIcon icon={faTags} className="h-5 w-5 shrink-0" aria-hidden />
+          <FontAwesomeIcon icon={faTags} className={navIconClass} aria-hidden />
           <span>Promos</span>
         </Link>
         <Link
@@ -107,34 +106,9 @@ export function MobileBottomNav() {
             accountActive ? "text-boma-blue" : "text-muted hover:text-foreground"
           }`}
         >
-          <FontAwesomeIcon icon={faUser} className="h-5 w-5 shrink-0" aria-hidden />
+          <FontAwesomeIcon icon={faUser} className={navIconClass} aria-hidden />
           <span>{user ? "Compte" : "Connexion"}</span>
         </Link>
-        <button
-          type="button"
-          onClick={openCart}
-          className={`${navBtnClass} text-muted hover:text-foreground`}
-          aria-haspopup="dialog"
-          aria-label={
-            itemCount > 0
-              ? `Panier, ${itemCount} article${itemCount > 1 ? "s" : ""}`
-              : "Ouvrir le panier"
-          }
-        >
-          <span key={bumpKey} className="relative inline-flex">
-            <FontAwesomeIcon
-              icon={faCartShopping}
-              className="h-5 w-5 shrink-0"
-              aria-hidden
-            />
-            {itemCount > 0 ? (
-              <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-boma-blue px-0.5 text-[9px] font-bold text-white tabular-nums">
-                {itemCount > 9 ? "9+" : itemCount}
-              </span>
-            ) : null}
-          </span>
-          <span>Panier</span>
-        </button>
       </div>
     </nav>
   );

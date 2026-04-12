@@ -171,27 +171,27 @@ export default async function HomePage() {
                 }}
               />
               <div className="boma-panel boma-panel--glow relative overflow-hidden rounded-[2rem] bg-card shadow-2xl shadow-boma-blue/10">
-                <div className="grid grid-cols-2 gap-3 p-6">
+                <div className="grid grid-cols-2 gap-2 p-3 sm:gap-3 sm:p-6">
                   {heroBannerTiles.map((tile) => (
                     <div
                       key={tile.discount}
-                      className="group boma-tile-glow flex aspect-square flex-col overflow-hidden rounded-2xl bg-boma-forest/10"
+                      className="group boma-tile-glow flex aspect-[10/11] flex-col overflow-hidden rounded-2xl bg-boma-forest/10 sm:aspect-square"
                     >
-                      <div className="flex shrink-0 items-start px-3 pt-3">
-                        <span className="text-2xl font-bold text-boma-blue">
+                      <div className="flex shrink-0 items-start px-2 pt-2 sm:px-3 sm:pt-3">
+                        <span className="text-lg font-bold leading-none text-boma-blue sm:text-2xl">
                           {tile.discount}
                         </span>
                       </div>
-                      <div className="relative mx-2 my-2 min-h-0 flex-1 overflow-hidden rounded-xl bg-foreground/5">
+                      <div className="relative mx-1.5 my-1.5 min-h-[6.25rem] flex-1 overflow-hidden rounded-lg bg-foreground/5 sm:mx-2 sm:my-2 sm:min-h-0 sm:rounded-xl">
                         <Image
                           src={tile.image}
                           alt={tile.imageAlt}
                           fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                          sizes="(max-width: 640px) 42vw, 180px"
+                          className="object-contain object-center p-0.5 transition-transform duration-500 group-hover:scale-[1.02] sm:object-cover sm:p-0 sm:group-hover:scale-105"
+                          sizes="(max-width: 640px) 45vw, 180px"
                         />
                       </div>
-                      <span className="shrink-0 px-3 pb-3 text-xs font-medium text-muted">
+                      <span className="shrink-0 px-2 pb-2 text-[10px] font-medium leading-tight text-muted sm:px-3 sm:pb-3 sm:text-xs">
                         Offre du jour
                       </span>
                     </div>
