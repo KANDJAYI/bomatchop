@@ -11,6 +11,7 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
 import { useToast } from "@/context/toast-context";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { groupCartLinesByVendor } from "@/lib/cart-vendor-groups";
 import { formatXAF } from "@/lib/mock-products";
 import type { PaymentMethod } from "@/lib/types";
 
@@ -24,25 +25,26 @@ const PAYMENT_CHOICES: {
     value: "cash_on_delivery",
     label: "À la livraison",
     description: "Réglez en espèces ou par mobile money au retrait.",
-    logoSrc: "/payments/cash-delivery.svg",
+    logoSrc: "/payments/cash-delivery.webp",
   },
   {
     value: "airtel_money",
     label: "Airtel Money",
     description: "Paiement via le compte Airtel Money du numéro indiqué.",
-    logoSrc: "/payments/airtel-money.svg",
+    logoSrc: "/payments/airtel-money.webp",
   },
   {
     value: "moov_money",
     label: "Moov Money",
     description: "Paiement via le compte Moov Money du numéro indiqué.",
-    logoSrc: "/payments/moov-money.svg",
+    logoSrc: "/payments/moov-money.webp",
   },
 ];
 
 export function CheckoutClient() {
   const router = useRouter();
   const { lines, total, clear, itemCount } = useCart();
+  const vendorGroups = groupCartLinesByVendor(lines);
   const { showToast } = useToast();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -98,7 +100,14 @@ export function CheckoutClient() {
     }
 
     clear();
-    showToast("Commande confirmée", "success");
+    const nOrders =
+      "orderIds" in r && Array.isArray(r.orderIds) ? r.orderIds.length : 1;
+    showToast(
+      nOrders > 1
+        ? `${nOrders} commandes confirmées — une par commerce`
+        : "Commande confirmée",
+      "success",
+    );
     router.push("/dashboard");
   }
 
@@ -135,8 +144,10 @@ export function CheckoutClient() {
           Finaliser la commande
         </h1>
         <p className="text-sm text-muted">
-          Paiement à la livraison ou mobile money (Airtel / Moov). Les montants
-          sont recalculés côté serveur.
+          Paiement à la livraison ou mobile money (Airtel / Moov). Les montants sont
+          recalculés côté serveur. Si votre panier contient des offres de{" "}
+          <strong className="text-foreground">plusieurs commerces</strong>, une commande
+          distincte sera créée pour chaque vendeur (même paiement et coordonnées).
         </p>
         <label className="flex flex-col gap-2 text-sm font-medium">
           Nom complet
@@ -229,18 +240,37 @@ export function CheckoutClient() {
       <aside className="lg:col-span-2">
         <div className="boma-panel boma-panel--glow sticky top-24 space-y-4 rounded-3xl bg-boma-forest/5 p-6 dark:bg-boma-forest/15">
           <h2 className="text-lg font-semibold">Résumé</h2>
-          <ul className="space-y-2 text-sm text-muted">
-            {lines.map((l) => (
-              <li key={l.product.id} className="flex justify-between gap-2">
-                <span className="truncate">
-                  {l.product.name} × {l.quantity}
-                </span>
-                <span className="shrink-0 font-medium text-foreground">
-                  {formatXAF(l.product.pricePromo * l.quantity)}
-                </span>
-              </li>
+          {vendorGroups.length > 1 && (
+            <p className="rounded-xl bg-boma-blue/[0.08] px-3 py-2 text-xs leading-relaxed text-muted">
+              {vendorGroups.length} commerces — vous recevrez{" "}
+              <strong className="text-foreground">{vendorGroups.length} commandes</strong>{" "}
+              liées à ce paiement.
+            </p>
+          )}
+          <div className="space-y-4 text-sm text-muted">
+            {vendorGroups.map((g) => (
+              <div key={g.vendorId}>
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-boma-forest dark:text-emerald-300">
+                  {g.vendorName}
+                </p>
+                <ul className="space-y-2">
+                  {g.lines.map((l) => (
+                    <li key={l.product.id} className="flex justify-between gap-2">
+                      <span className="truncate">
+                        {l.product.name} × {l.quantity}
+                      </span>
+                      <span className="shrink-0 font-medium text-foreground">
+                        {formatXAF(l.product.pricePromo * l.quantity)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-1 text-right text-xs text-muted">
+                  Sous-total {formatXAF(g.subtotal)}
+                </p>
+              </div>
             ))}
-          </ul>
+          </div>
           <div className="pt-4 text-base font-semibold">
             <div className="flex justify-between">
               <span>{itemCount} articles</span>

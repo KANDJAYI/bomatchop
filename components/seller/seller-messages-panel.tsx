@@ -25,11 +25,14 @@ export function SellerMessagesPanel({ messages }: { messages: VendorMessageRow[]
 
   if (!messages.length) {
     return (
-      <div className="boma-panel rounded-3xl bg-card/60 p-12 text-center">
-        <p className="text-sm font-medium text-foreground">Aucun message pour l’instant</p>
-        <p className="mx-auto mt-2 max-w-md text-sm text-muted">
-          L’équipe BOMA peut vous écrire ici (validation, consignes, alertes). Vous serez
-          notifié dès qu’un message arrive.
+      <div className="rounded-3xl border border-dashed border-zinc-200 bg-zinc-50/80 px-6 py-14 text-center dark:border-zinc-700 dark:bg-zinc-950/40 sm:px-10">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-zinc-400 dark:border-zinc-700 dark:bg-zinc-900">
+          <IconEnvelope className="h-7 w-7" />
+        </div>
+        <p className="mt-5 text-base font-semibold text-foreground">Boîte de réception vide</p>
+        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">
+          L’équipe BOMA peut vous écrire ici. Les messages importants apparaîtront dans cette
+          liste.
         </p>
       </div>
     );
@@ -42,10 +45,10 @@ export function SellerMessagesPanel({ messages }: { messages: VendorMessageRow[]
         return (
           <li
             key={m.id}
-            className={`boma-panel rounded-2xl p-5 transition-all ${
+            className={`rounded-2xl border p-5 transition-shadow ${
               unread
-                ? "bg-boma-blue/[0.06] shadow-[0_0_24px_-8px_var(--boma-glow-blue)]"
-                : ""
+                ? "border-boma-blue/20 bg-boma-blue/[0.04] shadow-[0_0_28px_-10px_var(--boma-glow-blue)] dark:border-boma-blue/25 dark:bg-boma-blue/[0.08]"
+                : "border-zinc-200/90 bg-white dark:border-zinc-800 dark:bg-zinc-900/40"
             }`}
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -78,5 +81,17 @@ export function SellerMessagesPanel({ messages }: { messages: VendorMessageRow[]
         );
       })}
     </ul>
+  );
+}
+
+function IconEnvelope({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+      />
+    </svg>
   );
 }

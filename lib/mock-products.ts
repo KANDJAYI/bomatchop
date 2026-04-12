@@ -3,6 +3,7 @@ import type { Product } from "./types";
 export const MOCK_PRODUCTS: Product[] = [
   {
     id: "1",
+    vendorId: "mock-vendor-boulangerie-centre",
     name: "Panier surprise boulangerie",
     description:
       "Viennoiseries et pains du jour à récupérer en fin de matinée. Contenu variable selon les invendus.",
@@ -17,6 +18,7 @@ export const MOCK_PRODUCTS: Product[] = [
   },
   {
     id: "2",
+    vendorId: "mock-vendor-gabon-gourmand",
     name: "Menu du midi",
     description:
       "Plat du jour + accompagnement. Préparé le matin même, à retirer entre 14h et 16h.",
@@ -31,6 +33,7 @@ export const MOCK_PRODUCTS: Product[] = [
   },
   {
     id: "3",
+    vendorId: "mock-vendor-marche-vert",
     name: "Plateau fruits & légumes",
     description:
       "Sélection de fruits et légumes encore parfaits pour consommation immédiate ou jus.",
@@ -45,6 +48,7 @@ export const MOCK_PRODUCTS: Product[] = [
   },
   {
     id: "4",
+    vendorId: "mock-vendor-sushi-libreville",
     name: "Box sushi du soir",
     description:
       "Assortiment 12 pièces. Dernière fournée avant fermeture — à consommer rapidement.",
@@ -59,6 +63,7 @@ export const MOCK_PRODUCTS: Product[] = [
   },
   {
     id: "5",
+    vendorId: "mock-vendor-hyper-u",
     name: "Plateaux fromages & charcuterie",
     description:
       "Invendus du rayon traiteur, emballés sous vide. Date courte.",
@@ -73,6 +78,7 @@ export const MOCK_PRODUCTS: Product[] = [
   },
   {
     id: "6",
+    vendorId: "mock-vendor-pizza-nova",
     name: "Pizza familiale",
     description:
       "Grande pizza du jour non vendue en soirée. À réchauffer au four.",

@@ -4,10 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
+import { groupCartLinesByVendor } from "@/lib/cart-vendor-groups";
 import { formatXAF } from "@/lib/mock-products";
 
 export function CartPageClient() {
   const { lines, setQuantity, remove, total, itemCount } = useCart();
+  const vendorGroups = groupCartLinesByVendor(lines);
 
   if (lines.length === 0) {
     return (
@@ -30,8 +32,21 @@ export function CartPageClient() {
       <p className="mt-1 text-sm text-muted">
         {itemCount} article{itemCount > 1 ? "s" : ""} · Mise à jour instantanée
       </p>
-      <ul className="mt-10 space-y-4">
-        {lines.map(({ product, quantity }) => (
+      {vendorGroups.length > 1 && (
+        <p className="mt-6 rounded-2xl bg-boma-blue/[0.08] px-4 py-3 text-sm leading-relaxed text-muted">
+          Panier multi-commerces : au paiement,{" "}
+          <strong className="text-foreground">une commande sera créée par vendeur</strong>{" "}
+          pour que chaque commerce reçoive uniquement ses articles.
+        </p>
+      )}
+      <ul className="mt-10 space-y-6">
+        {vendorGroups.map((g) => (
+          <li key={g.vendorId} className="list-none">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-boma-forest dark:text-emerald-300">
+              {g.vendorName}
+            </p>
+            <ul className="space-y-4">
+              {g.lines.map(({ product, quantity }) => (
           <li
             key={product.id}
             className="boma-panel boma-panel--glow flex gap-4 rounded-3xl bg-card p-4 shadow-sm"
@@ -95,6 +110,13 @@ export function CartPageClient() {
               </div>
             </div>
           </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-right text-sm font-medium text-muted">
+              Sous-total {g.vendorName} :{" "}
+              <span className="text-foreground">{formatXAF(g.subtotal)}</span>
+            </p>
+          </li>
         ))}
       </ul>
       <div className="boma-panel boma-panel--glow mt-10 rounded-3xl bg-boma-forest/5 p-6 dark:bg-boma-forest/15">
@@ -108,7 +130,7 @@ export function CartPageClient() {
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <span className="relative inline-block h-10 w-[120px] overflow-hidden rounded-md opacity-90">
             <Image
-              src="/payments/cash-delivery.svg"
+              src="/payments/cash-delivery.webp"
               alt="Paiement à la livraison"
               width={240}
               height={52}
@@ -118,7 +140,7 @@ export function CartPageClient() {
           </span>
           <span className="relative inline-block h-10 w-[120px] overflow-hidden rounded-md">
             <Image
-              src="/payments/airtel-money.svg"
+              src="/payments/airtel-money.webp"
               alt="Airtel Money"
               width={240}
               height={52}
@@ -128,7 +150,7 @@ export function CartPageClient() {
           </span>
           <span className="relative inline-block h-10 w-[120px] overflow-hidden rounded-md">
             <Image
-              src="/payments/moov-money.svg"
+              src="/payments/moov-money.webp"
               alt="Moov Money"
               width={240}
               height={52}

@@ -18,6 +18,9 @@ type CartContextValue = {
   total: number;
   itemCount: number;
   bumpKey: number;
+  sidebarOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -25,6 +28,10 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [bumpKey, setBumpKey] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const openCart = useCallback(() => setSidebarOpen(true), []);
+  const closeCart = useCallback(() => setSidebarOpen(false), []);
 
   const add = useCallback((product: Product, qty = 1) => {
     setLines((prev) => {
@@ -38,6 +45,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return next;
     });
     setBumpKey((k) => k + 1);
+    setSidebarOpen(true);
   }, []);
 
   const setQuantity = useCallback((productId: string, quantity: number) => {
@@ -77,8 +85,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       total,
       itemCount,
       bumpKey,
+      sidebarOpen,
+      openCart,
+      closeCart,
     }),
-    [lines, add, setQuantity, remove, clear, total, itemCount, bumpKey],
+    [
+      lines,
+      add,
+      setQuantity,
+      remove,
+      clear,
+      total,
+      itemCount,
+      bumpKey,
+      sidebarOpen,
+      openCart,
+      closeCart,
+    ],
   );
 
   return (

@@ -52,7 +52,10 @@ export function Logo({ className = "", href = "/" }: LogoProps) {
 
   if (href) {
     return (
-      <Link href={href} className="focus:outline-none focus-visible:ring-2 focus-visible:ring-boma-blue rounded-xl">
+      <Link
+        href={href}
+        className="rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-boma-blue/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      >
         {content}
       </Link>
     );

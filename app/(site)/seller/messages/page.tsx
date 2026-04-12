@@ -37,9 +37,9 @@ export default async function SellerMessagesPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <p className="text-sm text-muted">
-        Messages envoyés par l’administration de la plateforme — conserves-les comme
-        référence pour votre activité.
+      <p className="max-w-2xl text-sm leading-relaxed text-muted">
+        Communications officielles de l’équipe BOMA (validation, consignes, alertes).
+        Conservez-les comme référence pour votre activité.
       </p>
       {error ? (
         <p className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-950 dark:text-amber-100">

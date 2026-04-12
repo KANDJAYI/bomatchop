@@ -47,14 +47,19 @@ export async function registerAction(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const full_name = String(formData.get("full_name") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
   const hdrs = await headers();
   const origin = hdrs.get("origin") ?? "http://localhost:3000";
+
+  if (phone.length < 8) {
+    return { error: "Numéro de téléphone invalide." };
+  }
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { full_name },
+      data: { full_name, phone },
       emailRedirectTo: `${origin}/auth/callback`,
     },
   });
@@ -64,6 +69,64 @@ export async function registerAction(
   return {
     message:
       "Compte créé. Si la confirmation e-mail est activée sur Supabase, vérifiez votre boîte.",
+  };
+}
+
+export async function registerVendorAction(
+  _prev: { error?: string; message?: string } | null,
+  formData: FormData,
+): Promise<{ error?: string; message?: string }> {
+  const supabase = await createClient();
+  if (!supabase) {
+    return { error: "Supabase non configuré (.env.local)." };
+  }
+  const first_name = String(formData.get("first_name") ?? "").trim();
+  const last_name = String(formData.get("last_name") ?? "").trim();
+  const business_name = String(formData.get("business_name") ?? "").trim();
+  const business_type = String(formData.get("business_type") ?? "boutique").trim();
+  const location = String(formData.get("location") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  const hdrs = await headers();
+  const origin = hdrs.get("origin") ?? "http://localhost:3000";
+
+  const full_name = `${first_name} ${last_name}`.trim();
+  if (first_name.length < 1 || last_name.length < 1) {
+    return { error: "Indiquez votre prénom et votre nom." };
+  }
+  if (business_name.length < 2) {
+    return { error: "Indiquez le nom de votre commerce." };
+  }
+  if (location.length < 2) {
+    return { error: "Indiquez une localisation (ville, quartier…)." };
+  }
+  if (phone.length < 8) {
+    return { error: "Numéro de téléphone invalide." };
+  }
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name,
+        first_name,
+        last_name,
+        business_name,
+        business_type,
+        location,
+        phone,
+      },
+      emailRedirectTo: `${origin}/auth/callback`,
+    },
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath("/", "layout");
+  return {
+    message:
+      "Compte commerçant créé. Si la confirmation e-mail est activée, validez le lien reçu puis déposez votre dossier (pièces et photos).",
   };
 }
 
@@ -504,17 +567,38 @@ export async function finalizeCheckoutAction(input: {
     quantity: i.quantity,
   }));
 
-  const { data: orderId, error } = await supabase.rpc("create_order", {
-    p_payment: input.paymentMethod,
-    p_items: payload,
-  });
+  const { data: orderIdsRaw, error } = await supabase.rpc(
+    "create_orders_split_by_vendor",
+    {
+      p_payment: input.paymentMethod,
+      p_items: payload,
+    },
+  );
 
-  if (error) return { error: error.message };
+  if (error) {
+    const msg = error.message ?? "";
+    if (
+      msg.includes("create_orders_split_by_vendor") &&
+      (msg.includes("does not exist") || msg.includes("n'existe pas"))
+    ) {
+      return {
+        error:
+          "Migration Supabase requise : exécutez supabase/migrations/20260413130000_orders_split_by_vendor.sql (commandes séparées par vendeur).",
+      };
+    }
+    return { error: msg };
+  }
+
+  const orderIds = Array.isArray(orderIdsRaw)
+    ? (orderIdsRaw as string[])
+    : orderIdsRaw != null
+      ? [String(orderIdsRaw)]
+      : [];
 
   revalidatePath("/dashboard");
   revalidatePath("/seller/orders");
   revalidatePath("/marketplace");
-  return { ok: true as const, orderId: orderId as string };
+  return { ok: true as const, orderIds };
 }
 
 export async function recordCheckoutAbandonAction() {

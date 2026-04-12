@@ -42,6 +42,18 @@ export function RegisterForm() {
         />
       </label>
       <label className="flex flex-col gap-2 text-sm font-medium">
+        Téléphone
+        <input
+          name="phone"
+          type="tel"
+          required
+          inputMode="tel"
+          autoComplete="tel"
+          placeholder="Ex. 06 12 34 56 78"
+          className="boma-field rounded-2xl bg-background px-4 py-3"
+        />
+      </label>
+      <label className="flex flex-col gap-2 text-sm font-medium">
         E-mail
         <input
           name="email"

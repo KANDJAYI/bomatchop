@@ -40,12 +40,12 @@ export default async function SellerProductsPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm text-muted">Gestion du catalogue marché</p>
-          <h2 className="text-2xl font-semibold tracking-tight">Mes produits</h2>
-        </div>
-        <ButtonLink href="/seller/products/new" variant="primary" className="w-full sm:w-auto">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <p className="max-w-xl text-sm leading-relaxed text-muted">
+          Gérez vos références, prix et stocks. Chaque modification est reflétée sur le
+          marché public après enregistrement.
+        </p>
+        <ButtonLink href="/seller/products/new" variant="primary" className="w-full shrink-0 sm:w-auto">
           + Nouvelle offre
         </ButtonLink>
       </div>

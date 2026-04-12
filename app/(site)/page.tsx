@@ -1,4 +1,98 @@
+import Image from "next/image";
+import Link from "next/link";
+import {
+  HomeCategoryCardsList,
+  type HomeCategoryItem,
+} from "@/components/home-category-cards";
+import { ParallaxSectionBg } from "@/components/parallax-section-bg";
+import { ProductCard } from "@/components/product-card";
 import { ButtonLink } from "@/components/ui/button";
+import { VENDOR_TYPE_FR } from "@/lib/labels-fr";
+import { fetchMarketplaceProducts } from "@/lib/data/products";
+import type { Product, VendorType } from "@/lib/types";
+
+export const dynamic = "force-dynamic";
+
+/** Fonds parallaxe — sections « Comment ça marche » et « Pourquoi BOMA » (~4K, haute qualité) */
+const stepsSectionParallaxImage =
+  "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=3840&h=2160&q=95";
+const whyBomaSectionParallaxImage =
+  "https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=3840&h=2160&q=95";
+
+/** Voile minimal : photo très visible ; titres/sous-titre renforcés au-dessus */
+const parallaxOverlayMid =
+  "bg-gradient-to-b from-background/28 via-background/10 to-transparent dark:from-background/36 dark:via-background/14 dark:to-transparent";
+
+const heroBannerTiles = [
+  {
+    discount: "45 %",
+    image:
+      "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80",
+    imageAlt: "Pains et viennoiseries sur une planche",
+  },
+  {
+    discount: "38 %",
+    image:
+      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80",
+    imageAlt: "Bol coloré de salade et légumes frais",
+  },
+  {
+    discount: "52 %",
+    image:
+      "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=400&q=80",
+    imageAlt: "Fruits et légumes variés",
+  },
+  {
+    discount: "30 %",
+    image:
+      "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&q=80",
+    imageAlt: "Assortiment de sushis",
+  },
+] as const;
+
+function countByVendorType(products: Product[], t: VendorType): number {
+  return products.reduce((n, p) => n + (p.vendorType === t ? 1 : 0), 0);
+}
+
+const homeCategories: {
+  type: VendorType;
+  description: string;
+  accentClass: string;
+}[] = [
+  {
+    type: "restaurant",
+    description: "Plats, menus et invendus prêts à déguster.",
+    accentClass:
+      "bg-gradient-to-br from-boma-spectrum-red/18 via-transparent to-boma-blue/8",
+  },
+  {
+    type: "supermarche",
+    description: "Courses et produits frais à prix réduit.",
+    accentClass:
+      "bg-gradient-to-br from-boma-blue/15 via-transparent to-boma-spectrum-green/12",
+  },
+  {
+    type: "boutique",
+    description: "Épicerie fine et spécialités locales.",
+    accentClass:
+      "bg-gradient-to-br from-boma-spectrum-yellow/20 via-transparent to-boma-spectrum-red/10",
+  },
+];
+
+function pickBestOffers(products: Product[], limit = 6): Product[] {
+  return [...products]
+    .map((p) => {
+      const original = p.priceOriginal;
+      const disc =
+        original > 0
+          ? Math.max(0, Math.min(1, 1 - p.pricePromo / original))
+          : 0;
+      return { p, disc };
+    })
+    .sort((a, b) => b.disc - a.disc)
+    .slice(0, limit)
+    .map(({ p }) => p);
+}
 
 const steps = [
   {
@@ -30,7 +124,17 @@ const benefits = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const products = await fetchMarketplaceProducts();
+  const bestOffers = pickBestOffers(products, 6);
+  const categoryItems: HomeCategoryItem[] = homeCategories.map((c) => ({
+    type: c.type,
+    label: VENDOR_TYPE_FR[c.type],
+    description: c.description,
+    accentClass: c.accentClass,
+    count: countByVendorType(products, c.type),
+  }));
+
   return (
     <>
       <section className="relative overflow-hidden">
@@ -42,13 +146,11 @@ export default function HomePage() {
             </p>
             <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
               Sauvez le bon goût,{" "}
-              <span className="text-boma-blue">pas seulement votre budget</span>
-              .
+              <span className="text-boma-blue">pas seulement votre budget</span>.
             </h1>
             <p className="max-w-xl text-lg text-muted leading-relaxed">
-              BOMA connecte commerces, restaurants et consommateurs pour écouler
-              les invendus à prix doux — une expérience premium, simple et
-              rapide.
+              BOMA connecte commerces, restaurants et consommateurs pour écouler les
+              invendus à prix doux — une expérience premium, simple et rapide.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <ButtonLink href="/marketplace" variant="primary">
@@ -70,15 +172,26 @@ export default function HomePage() {
               />
               <div className="boma-panel boma-panel--glow relative overflow-hidden rounded-[2rem] bg-card shadow-2xl shadow-boma-blue/10">
                 <div className="grid grid-cols-2 gap-3 p-6">
-                  {["45 %", "38 %", "52 %", "30 %"].map((badge) => (
+                  {heroBannerTiles.map((tile) => (
                     <div
-                      key={badge}
-                      className="boma-tile-glow flex aspect-square flex-col justify-between rounded-2xl bg-boma-forest/10 p-4"
+                      key={tile.discount}
+                      className="group boma-tile-glow flex aspect-square flex-col overflow-hidden rounded-2xl bg-boma-forest/10"
                     >
-                      <span className="text-2xl font-bold text-boma-blue">
-                        {badge}
-                      </span>
-                      <span className="text-xs font-medium text-muted">
+                      <div className="flex shrink-0 items-start px-3 pt-3">
+                        <span className="text-2xl font-bold text-boma-blue">
+                          {tile.discount}
+                        </span>
+                      </div>
+                      <div className="relative mx-2 my-2 min-h-0 flex-1 overflow-hidden rounded-xl bg-foreground/5">
+                        <Image
+                          src={tile.image}
+                          alt={tile.imageAlt}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          sizes="(max-width: 640px) 42vw, 180px"
+                        />
+                      </div>
+                      <span className="shrink-0 px-3 pb-3 text-xs font-medium text-muted">
                         Offre du jour
                       </span>
                     </div>
@@ -93,20 +206,76 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] px-4 py-20 sm:px-6">
-        <div className="boma-spectrum-bg boma-spectrum-bg--subtle rounded-[2rem]" aria-hidden />
-        <h2 className="relative z-10 text-center text-3xl font-semibold tracking-tight">
+      <section className="border-t border-foreground/5 bg-boma-forest/[0.03] py-16 dark:bg-boma-forest/[0.08]">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-xl">
+              <h2 className="text-3xl font-semibold tracking-tight">
+                Les meilleures offres
+              </h2>
+              <p className="mt-2 text-muted leading-relaxed">
+                Une sélection des réductions les plus marquantes du moment —
+                mis à jour avec les offres actives sur le marché.
+              </p>
+            </div>
+            <ButtonLink href="/marketplace" variant="secondary" className="shrink-0 self-start sm:self-auto">
+              Tout voir
+            </ButtonLink>
+          </div>
+          {bestOffers.length === 0 ? (
+            <div className="boma-panel boma-panel--glow rounded-3xl bg-card px-6 py-14 text-center shadow-sm">
+              <p className="text-muted">
+                Aucune offre pour l’instant. Revenez bientôt ou parcourez le
+                marché pour les nouveautés.
+              </p>
+              <div className="mt-6 flex justify-center">
+                <ButtonLink href="/marketplace">Ouvrir le marché</ButtonLink>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
+              {bestOffers.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="border-t border-foreground/5 py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="mb-10 max-w-xl">
+            <h2 className="text-3xl font-semibold tracking-tight">
+              Catégories
+            </h2>
+            <p className="mt-2 text-muted leading-relaxed">
+              Parcourez les offres par type de commerce — le même filtre s’applique
+              automatiquement sur le marché.
+            </p>
+          </div>
+          <HomeCategoryCardsList items={categoryItems} />
+        </div>
+      </section>
+
+      <ParallaxSectionBg
+        imageSrc={stepsSectionParallaxImage}
+        intensity={0.12}
+        priority
+        className="border-t border-foreground/5 py-20 sm:py-24"
+        contentClassName="mx-auto max-w-6xl px-4 sm:px-6"
+        overlayClassName={parallaxOverlayMid}
+      >
+        <h2 className="text-center text-3xl font-semibold tracking-tight [text-shadow:0_0_28px_var(--background),0_2px_12px_var(--background),0_1px_2px_rgba(0,0,0,0.12)] dark:[text-shadow:0_0_32px_rgb(0,0,0),0_2px_16px_rgb(0,0,0),0_1px_2px_rgba(0,0,0,0.5)]">
           Comment ça marche
         </h2>
-        <p className="relative z-10 mx-auto mt-3 max-w-lg text-center text-muted">
-          Trois étapes pour transformer une invendu en repas ou en courses
-          malins.
+        <p className="mx-auto mt-3 max-w-lg rounded-2xl bg-background/70 px-5 py-2.5 text-center text-sm text-foreground/90 shadow-sm ring-1 ring-foreground/10 backdrop-blur-[6px] dark:bg-background/55 dark:text-foreground/95">
+          Trois étapes pour transformer une invendu en repas ou en courses malins.
         </p>
-        <ol className="relative z-10 mt-14 grid gap-10 md:grid-cols-3">
+        <ol className="mt-14 grid gap-10 md:grid-cols-3">
           {steps.map((s, i) => (
             <li
               key={s.title}
-              className="boma-panel boma-panel--glow relative rounded-3xl bg-card p-8 shadow-sm transition-all hover:-translate-y-0.5"
+              className="boma-panel boma-panel--glow relative rounded-3xl bg-card p-8 shadow-md ring-1 ring-foreground/5 transition-all hover:-translate-y-0.5"
             >
               <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-boma-blue text-lg font-bold text-white">
                 {i + 1}
@@ -116,31 +285,32 @@ export default function HomePage() {
             </li>
           ))}
         </ol>
-      </section>
+      </ParallaxSectionBg>
 
-      <section className="relative overflow-hidden bg-boma-forest/[0.04] py-20 dark:bg-boma-forest/10">
-        <div className="boma-spectrum-bg boma-spectrum-bg--subtle" aria-hidden />
-        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
-          <h2 className="text-center text-3xl font-semibold tracking-tight">
-            Pourquoi BOMA
-          </h2>
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
-            {benefits.map((b) => (
-              <div
-                key={b.title}
-                className="boma-panel boma-panel--glow rounded-3xl bg-background/80 p-8 backdrop-blur-sm transition-all hover:scale-[1.02]"
-              >
-                <h3 className="text-lg font-semibold text-boma-forest dark:text-boma-blue">
-                  {b.title}
-                </h3>
-                <p className="mt-3 text-sm text-muted leading-relaxed">
-                  {b.text}
-                </p>
-              </div>
-            ))}
-          </div>
+      <ParallaxSectionBg
+        imageSrc={whyBomaSectionParallaxImage}
+        intensity={0.12}
+        className="border-t border-foreground/5 py-20 sm:py-24"
+        contentClassName="mx-auto max-w-6xl px-4 sm:px-6"
+        overlayClassName={parallaxOverlayMid}
+      >
+        <h2 className="text-center text-3xl font-semibold tracking-tight [text-shadow:0_0_28px_var(--background),0_2px_12px_var(--background),0_1px_2px_rgba(0,0,0,0.12)] dark:[text-shadow:0_0_32px_rgb(0,0,0),0_2px_16px_rgb(0,0,0),0_1px_2px_rgba(0,0,0,0.5)]">
+          Pourquoi BOMA
+        </h2>
+        <div className="mt-14 grid gap-8 md:grid-cols-3">
+          {benefits.map((b) => (
+            <div
+              key={b.title}
+              className="boma-panel boma-panel--glow rounded-3xl bg-background/92 p-8 shadow-md ring-1 ring-foreground/5 backdrop-blur-sm transition-all hover:scale-[1.02] dark:bg-background/88"
+            >
+              <h3 className="text-lg font-semibold text-boma-forest dark:text-boma-blue">
+                {b.title}
+              </h3>
+              <p className="mt-3 text-sm text-muted leading-relaxed">{b.text}</p>
+            </div>
+          ))}
         </div>
-      </section>
+      </ParallaxSectionBg>
 
       <section className="mx-auto max-w-6xl px-4 py-24 text-center sm:px-6">
         <h2 className="text-3xl font-semibold tracking-tight">

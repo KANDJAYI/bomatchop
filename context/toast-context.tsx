@@ -41,13 +41,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ showToast }}>
       {children}
       <div
-        className="pointer-events-none fixed bottom-6 left-1/2 z-[100] flex w-[min(100%-2rem,24rem)] -translate-x-1/2 flex-col gap-2"
+        className="pointer-events-none fixed left-1/2 top-[max(1.25rem,env(safe-area-inset-top,0px))] z-[100] flex w-[min(100%-2rem,24rem)] -translate-x-1/2 flex-col-reverse gap-2"
         aria-live="polite"
       >
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`pointer-events-auto animate-fade-up rounded-2xl border px-4 py-3 text-sm font-medium shadow-lg backdrop-blur-md transition-all ${
+            className={`pointer-events-auto animate-fade-in rounded-2xl border px-4 py-3 text-sm font-medium shadow-lg backdrop-blur-md transition-all ${
               t.variant === "success"
                 ? "border-emerald-500/30 bg-emerald-950/90 text-emerald-50 dark:bg-emerald-950/80"
                 : t.variant === "error"

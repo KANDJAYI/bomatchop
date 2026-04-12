@@ -61,7 +61,7 @@ export function SellerAccountPanel({
 
   return (
     <div className="mx-auto grid max-w-4xl gap-8 lg:grid-cols-2 lg:items-start">
-      <section className="boma-panel boma-panel--glow rounded-3xl bg-card p-6 sm:p-8">
+      <section className="rounded-3xl border border-zinc-200/90 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50 sm:p-8">
         <h2 className="text-lg font-semibold tracking-tight">Profil compte</h2>
         <p className="mt-1 text-sm text-muted">
           Nom et téléphone affichés sur vos interactions clients (commandes, support).
@@ -105,7 +105,7 @@ export function SellerAccountPanel({
       </section>
 
       <div className="space-y-8">
-        <section className="boma-panel rounded-3xl bg-card p-6 sm:p-8">
+        <section className="rounded-3xl border border-zinc-200/90 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50 sm:p-8">
           <h2 className="text-lg font-semibold tracking-tight">Fiche commerce</h2>
           <p className="mt-1 text-sm text-muted">
             Informations dossier vendeur — modification via l’administration en cas

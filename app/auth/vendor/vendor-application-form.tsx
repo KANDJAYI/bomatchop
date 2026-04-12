@@ -1,16 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { applyVendorApplication } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
 import { FileUploadField } from "@/components/file-upload-field";
 import { createClient } from "@/lib/supabase/client";
 import type { BusinessType } from "@/lib/types";
 
+function normalizeBusinessType(raw: string | undefined): BusinessType {
+  if (raw === "restaurant" || raw === "boutique" || raw === "supermarket") {
+    return raw;
+  }
+  return "boutique";
+}
+
 export function VendorApplicationForm() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [meta, setMeta] = useState<Record<string, string> | null>(null);
+  const [metaReady, setMetaReady] = useState(false);
+
+  useEffect(() => {
+    const s = createClient();
+    if (!s) {
+      setMetaReady(true);
+      return;
+    }
+    void s.auth.getUser().then(({ data }) => {
+      const m = data.user?.user_metadata;
+      if (m && typeof m === "object") {
+        setMeta(
+          Object.fromEntries(
+            Object.entries(m).map(([k, v]) => [k, v == null ? "" : String(v)]),
+          ),
+        );
+      }
+      setMetaReady(true);
+    });
+  }, []);
+
+  if (!metaReady) {
+    return (
+      <div className="animate-pulse space-y-4 py-4">
+        <div className="h-10 rounded-2xl bg-foreground/10" />
+        <div className="h-10 rounded-2xl bg-foreground/10" />
+        <div className="h-24 rounded-2xl bg-foreground/10" />
+      </div>
+    );
+  }
+
+  const defaultBusiness = normalizeBusinessType(meta?.business_type);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -116,13 +156,25 @@ export function VendorApplicationForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form
+      onSubmit={onSubmit}
+      className="space-y-5"
+      key={meta ? `prefill-${meta.email ?? "u"}` : "no-prefill"}
+    >
+      {meta &&
+        (meta.first_name || meta.business_name) && (
+          <p className="rounded-2xl border border-boma-blue/25 bg-boma-blue/8 px-4 py-3 text-sm text-muted">
+            Certaines informations ont été reprises de votre inscription. Vérifiez-les
+            avant d’envoyer votre dossier.
+          </p>
+        )}
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm font-medium">
           Prénom
           <input
             name="first_name"
             required
+            defaultValue={meta?.first_name ?? ""}
             className="boma-field rounded-2xl bg-background px-4 py-3"
           />
         </label>
@@ -131,6 +183,7 @@ export function VendorApplicationForm() {
           <input
             name="last_name"
             required
+            defaultValue={meta?.last_name ?? ""}
             className="boma-field rounded-2xl bg-background px-4 py-3"
           />
         </label>
@@ -140,6 +193,7 @@ export function VendorApplicationForm() {
         <input
           name="business_name"
           required
+          defaultValue={meta?.business_name ?? ""}
           className="boma-field rounded-2xl bg-background px-4 py-3"
         />
       </label>
@@ -148,6 +202,7 @@ export function VendorApplicationForm() {
         <select
           name="business_type"
           required
+          defaultValue={defaultBusiness}
           className="boma-field rounded-2xl bg-background px-4 py-3"
         >
           <option value="restaurant">Restaurant</option>
@@ -161,6 +216,7 @@ export function VendorApplicationForm() {
           name="location"
           required
           placeholder="Quartier, ville…"
+          defaultValue={meta?.location ?? ""}
           className="boma-field rounded-2xl bg-background px-4 py-3"
         />
       </label>
@@ -170,6 +226,7 @@ export function VendorApplicationForm() {
           name="phone"
           required
           inputMode="tel"
+          defaultValue={meta?.phone ?? ""}
           className="boma-field rounded-2xl bg-background px-4 py-3"
         />
       </label>

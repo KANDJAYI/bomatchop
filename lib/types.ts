@@ -11,6 +11,8 @@ export type Product = {
   priceOriginal: number;
   vendorType: VendorType;
   vendorName: string;
+  /** Identifiant vendeur (DB ou mock) — pour regrouper panier / commandes. */
+  vendorId: string;
   /** Portrait du vendeur (URL publique), pour reconnaître le commerce sur les annonces. */
   vendorAvatarUrl?: string | null;
 };

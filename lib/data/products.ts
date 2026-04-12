@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const PRODUCT_SELECT_VENDORS_WITH_AVATAR = `
       id,
+      vendor_id,
       name,
       description,
       image_url,
@@ -21,6 +22,7 @@ const PRODUCT_SELECT_VENDORS_WITH_AVATAR = `
 
 const PRODUCT_SELECT_VENDORS_LEGACY = `
       id,
+      vendor_id,
       name,
       description,
       image_url,
@@ -42,6 +44,7 @@ type VendorJoin = {
 
 type ProductRow = {
   id: string;
+  vendor_id: string;
   name: string;
   description: string | null;
   image_url: string | null;
@@ -71,6 +74,7 @@ export function mapProductRow(row: ProductRow): Product {
     priceOriginal: Number(row.price_original),
     vendorType: mapVendorType(v?.business_type ?? "supermarket"),
     vendorName,
+    vendorId: row.vendor_id,
     vendorAvatarUrl: avatar && avatar.length > 0 ? avatar : null,
   };
 }
