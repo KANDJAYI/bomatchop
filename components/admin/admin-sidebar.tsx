@@ -30,6 +30,11 @@ const nav = [
     icon: IconUsers,
   },
   {
+    href: "/admin/messages",
+    label: "Messages",
+    icon: IconMail,
+  },
+  {
     href: "/admin/schedule",
     label: "Tâches automatiques",
     icon: IconClock,
@@ -154,6 +159,14 @@ function IconClock({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
+function IconMail({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l9 6 9-6M4 6h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" />
     </svg>
   );
 }

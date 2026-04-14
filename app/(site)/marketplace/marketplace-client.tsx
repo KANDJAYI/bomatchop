@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ProductCard } from "@/components/product-card";
 import type { Product, VendorType } from "@/lib/types";
 
@@ -18,23 +18,51 @@ export function MarketplaceClient({
   const [query, setQuery] = useState(initialQuery);
   const [type, setType] = useState<"all" | VendorType>(initialType);
   const [maxPrice, setMaxPrice] = useState(50_000);
+  const [results, setResults] = useState<Product[]>(products);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     setQuery(initialQuery);
   }, [initialQuery]);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return products.filter((p) => {
-      if (type !== "all" && p.vendorType !== type) return false;
-      if (p.pricePromo > maxPrice) return false;
-      if (!q) return true;
-      return (
-        p.name.toLowerCase().includes(q) ||
-        p.vendorName.toLowerCase().includes(q)
-      );
-    });
-  }, [products, query, type, maxPrice]);
+  useEffect(() => {
+    // Recherche purement asynchrone (debounce + annulation).
+    setError(null);
+    setLoading(true);
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    const t = window.setTimeout(async () => {
+      try {
+        const sp = new URLSearchParams();
+        if (query.trim()) sp.set("q", query.trim());
+        if (type !== "all") sp.set("type", type);
+        sp.set("maxPrice", String(maxPrice));
+
+        const res = await fetch(`/api/marketplace/search?${sp.toString()}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error("SEARCH_FAILED");
+        const data = (await res.json()) as { results: Product[] };
+        setResults(Array.isArray(data.results) ? data.results : []);
+      } catch (e) {
+        // Abort = changement rapide de filtre / unmount.
+        if (controller.signal.aborted) return;
+        setError("Impossible de charger les résultats. Réessayez.");
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      window.clearTimeout(t);
+      controller.abort();
+    };
+  }, [query, type, maxPrice]);
 
   return (
     <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
@@ -87,17 +115,26 @@ export function MarketplaceClient({
         </label>
       </div>
 
-      {filtered.length === 0 ? (
+      {error ? (
+        <p className="boma-panel rounded-3xl bg-card px-6 py-10 text-center text-sm leading-relaxed text-muted ring-1 ring-foreground/[0.05] dark:ring-white/[0.06]">
+          {error}
+        </p>
+      ) : results.length === 0 ? (
         <p className="boma-panel rounded-3xl bg-card px-6 py-16 text-center text-sm leading-relaxed text-muted ring-1 ring-foreground/[0.05] dark:ring-white/[0.06]">
           Aucune offre ne correspond à vos critères. Essayez d’élargir la
           recherche ou le plafond de prix.
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-          {filtered.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
+        <>
+          {loading ? (
+            <p className="mb-4 text-sm text-muted">Recherche en cours…</p>
+          ) : null}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+            {results.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

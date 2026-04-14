@@ -14,9 +14,17 @@ import type { Product } from "@/lib/types";
 
 type ProductCardProps = {
   product: Product;
+  /** Appelé au clic sur la carte (navigation vers la fiche), avant la navigation. */
+  onProductNavigate?: () => void;
+  /** Surcharge `sizes` pour Next/Image (grilles denses, etc.). */
+  imageSizes?: string;
 };
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({
+  product,
+  onProductNavigate,
+  imageSizes = "(max-width:639px) 100vw, (max-width:1024px) 50vw, 33vw",
+}: ProductCardProps) {
   const { add } = useCart();
   const { showToast } = useToast();
   const { has, toggle } = useFavorites();
@@ -36,6 +44,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <Link
           href={`/product/${product.id}`}
           className="block min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-boma-blue/45"
+          onClick={() => onProductNavigate?.()}
         >
           <div className="relative aspect-[4/3] overflow-hidden bg-foreground/5">
             <Image
@@ -43,7 +52,7 @@ export function ProductCard({ product }: ProductCardProps) {
               alt=""
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width:639px) 100vw, (max-width:1024px) 50vw, 33vw"
+              sizes={imageSizes}
             />
             <span
               className="absolute left-3 top-3 rounded-full bg-boma-blue px-2.5 py-1 text-xs font-bold text-white shadow-md"

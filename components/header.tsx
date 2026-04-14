@@ -33,11 +33,13 @@ import { createPortal } from "react-dom";
 import { signOut } from "@/app/auth/actions";
 import { IconMoon, IconSun } from "@/components/icons";
 import { Logo } from "@/components/logo";
+import { ProductCard } from "@/components/product-card";
 import { useCart } from "@/context/cart-context";
 import { useTheme } from "@/context/theme-context";
 import { buildBurgerMenuSections, buildSiteNavItems } from "@/lib/site-nav";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import type { Product } from "@/lib/types";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 
 function burgerIconForHref(href: string, variant?: string) {
@@ -81,6 +83,12 @@ export function Header() {
   const [role, setRole] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchDraft, setSearchDraft] = useState("");
+  const [searchPreview, setSearchPreview] = useState<Product[]>([]);
+  const [searchPreviewLoading, setSearchPreviewLoading] = useState(false);
+  const [searchPreviewError, setSearchPreviewError] = useState<string | null>(
+    null,
+  );
+  const searchPreviewAbortRef = useRef<AbortController | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [burgerOpen, setBurgerOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -131,6 +139,57 @@ export function Header() {
       document.removeEventListener("keydown", onKey);
     };
   }, [searchOpen]);
+
+  useEffect(() => {
+    if (!searchOpen) {
+      searchPreviewAbortRef.current?.abort();
+      setSearchPreview([]);
+      setSearchPreviewLoading(false);
+      setSearchPreviewError(null);
+      return;
+    }
+
+    const q = searchDraft.trim();
+    if (q.length === 0) {
+      searchPreviewAbortRef.current?.abort();
+      setSearchPreview([]);
+      setSearchPreviewLoading(false);
+      setSearchPreviewError(null);
+      return;
+    }
+
+    setSearchPreviewLoading(true);
+    setSearchPreviewError(null);
+    searchPreviewAbortRef.current?.abort();
+    const controller = new AbortController();
+    searchPreviewAbortRef.current = controller;
+
+    const timer = window.setTimeout(async () => {
+      try {
+        const sp = new URLSearchParams();
+        sp.set("q", q);
+        sp.set("limit", "8");
+        sp.set("maxPrice", "1000000");
+        const res = await fetch(`/api/marketplace/search?${sp.toString()}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error("SEARCH_PREVIEW_FAILED");
+        const data = (await res.json()) as { results?: Product[] };
+        setSearchPreview(Array.isArray(data.results) ? data.results : []);
+      } catch {
+        if (controller.signal.aborted) return;
+        setSearchPreviewError("Impossible de charger les suggestions.");
+        setSearchPreview([]);
+      } finally {
+        if (!controller.signal.aborted) setSearchPreviewLoading(false);
+      }
+    }, 200);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [searchOpen, searchDraft]);
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
@@ -381,43 +440,104 @@ export function Header() {
           id="header-recherche"
           className="border-b border-foreground/[0.06] bg-background/95 px-4 py-3 backdrop-blur-md sm:px-6"
         >
-          <form
-            onSubmit={submitSearch}
-            className="mx-auto flex max-w-6xl flex-col gap-2 sm:flex-row sm:items-center sm:gap-3"
-          >
-            <label className="sr-only" htmlFor="header-search-input">
-              Recherche sur le marché
-            </label>
-            <input
-              ref={searchInputRef}
-              id="header-search-input"
-              type="search"
-              name="q"
-              value={searchDraft}
-              onChange={(e) => setSearchDraft(e.target.value)}
-              placeholder="Plat, commerce…"
-              className="boma-field min-h-0 flex-1 rounded-2xl px-4 py-2.5 text-sm"
-              autoComplete="off"
-            />
-            <div className="flex shrink-0 gap-2">
-              <button
-                type="submit"
-                className="pressable rounded-full bg-boma-blue px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-boma-blue/20 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-boma-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          <div className="mx-auto w-full max-w-[96rem] px-0 sm:px-0">
+            <form
+              onSubmit={submitSearch}
+              className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3"
+            >
+              <label className="sr-only" htmlFor="header-search-input">
+                Recherche sur le marché
+              </label>
+              <input
+                ref={searchInputRef}
+                id="header-search-input"
+                type="search"
+                name="q"
+                value={searchDraft}
+                onChange={(e) => setSearchDraft(e.target.value)}
+                placeholder="Plat, commerce…"
+                className="boma-field min-h-0 flex-1 rounded-2xl px-4 py-2.5 text-sm"
+                autoComplete="off"
+                aria-autocomplete="list"
+                aria-controls="header-search-results"
+                aria-expanded={searchDraft.trim().length > 0}
+              />
+              <div className="flex shrink-0 gap-2">
+                <button
+                  type="submit"
+                  className="pressable rounded-full bg-boma-blue px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-boma-blue/20 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-boma-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                >
+                  Rechercher
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchOpen(false);
+                    setSearchDraft("");
+                  }}
+                  className="pressable rounded-full bg-foreground/[0.06] px-4 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-foreground/[0.1] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-boma-blue/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                >
+                  Fermer
+                </button>
+              </div>
+            </form>
+
+            {searchDraft.trim().length > 0 ? (
+              <div
+                id="header-search-results"
+                role="region"
+                aria-label="Suggestions de recherche"
+                aria-live="polite"
+                className="mt-3 overflow-hidden rounded-2xl border border-foreground/[0.06] bg-card/60 shadow-sm ring-1 ring-foreground/[0.04] dark:bg-card/40 dark:ring-white/[0.06]"
               >
-                Rechercher
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchOpen(false);
-                  setSearchDraft("");
-                }}
-                className="pressable rounded-full bg-foreground/[0.06] px-4 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-foreground/[0.1] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-boma-blue/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              >
-                Fermer
-              </button>
-            </div>
-          </form>
+                {searchPreviewLoading ? (
+                  <p className="px-4 py-3 text-sm text-muted">Recherche en cours…</p>
+                ) : searchPreviewError ? (
+                  <p className="px-4 py-3 text-sm text-muted">{searchPreviewError}</p>
+                ) : searchPreview.length === 0 ? (
+                  <p className="px-4 py-3 text-sm text-muted">
+                    Aucun résultat pour « {searchDraft.trim()} ».
+                  </p>
+                ) : (
+                  <div className="max-h-[min(70vh,52rem)] overflow-y-auto overscroll-contain p-3 sm:p-4">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                      {searchPreview.map((p) => (
+                        <ProductCard
+                          key={p.id}
+                          product={p}
+                          onProductNavigate={() => {
+                            setSearchOpen(false);
+                            setSearchDraft("");
+                          }}
+                          imageSizes="(max-width:639px) 100vw, (max-width:1023px) 50vw, (max-width:1279px) 33vw, (max-width:1535px) 25vw, 20vw"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {!searchPreviewLoading &&
+                !searchPreviewError &&
+                searchPreview.length > 0 ? (
+                  <div className="border-t border-foreground/[0.06] bg-foreground/[0.02] px-3 py-2">
+                    <Link
+                      href={`/marketplace?q=${encodeURIComponent(searchDraft.trim())}`}
+                      className="block rounded-xl px-3 py-2 text-center text-sm font-semibold text-boma-blue transition-colors hover:bg-boma-blue/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-boma-blue/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                      onClick={() => {
+                        setSearchOpen(false);
+                        setSearchDraft("");
+                      }}
+                    >
+                      Voir tout sur le marché
+                    </Link>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <p className="mt-3 text-xs text-muted">
+                Commencez à taper : les résultats s’affichent tout de suite.
+              </p>
+            )}
+          </div>
         </div>
       ) : null}
       {mounted && burgerOpen

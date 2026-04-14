@@ -54,6 +54,14 @@ function countByVendorType(products: Product[], t: VendorType): number {
   return products.reduce((n, p) => n + (p.vendorType === t ? 1 : 0), 0);
 }
 
+function discountPctLabel(p: Product): string {
+  const original = p.priceOriginal;
+  if (!Number.isFinite(original) || original <= 0) return "0 %";
+  const disc = 1 - p.pricePromo / original;
+  const pct = Math.max(0, Math.min(100, Math.round(disc * 100)));
+  return `${pct} %`;
+}
+
 const homeCategories: {
   type: VendorType;
   description: string;
@@ -88,6 +96,22 @@ function pickBestOffers(products: Product[], limit = 6): Product[] {
     .map(({ p }) => p);
 }
 
+/** Offres les plus récemment publiées (`created_at` côté base). */
+function pickNewestOffers(products: Product[], limit = 4): Product[] {
+  return [...products]
+    .sort((a, b) => {
+      const ta = new Date(a.createdAt).getTime();
+      const tb = new Date(b.createdAt).getTime();
+      const aOk = Number.isFinite(ta);
+      const bOk = Number.isFinite(tb);
+      if (!aOk && !bOk) return 0;
+      if (!aOk) return 1;
+      if (!bOk) return -1;
+      return tb - ta;
+    })
+    .slice(0, limit);
+}
+
 const steps = [
   {
     title: "Parcourez les offres",
@@ -120,6 +144,7 @@ const benefits = [
 
 export default async function HomePage() {
   const products = await fetchMarketplaceProducts();
+  const heroOfferTiles = pickNewestOffers(products, 4);
   const bestOffers = pickBestOffers(products, 6);
   const categoryItems: HomeCategoryItem[] = homeCategories.map((c) => ({
     type: c.type,
@@ -166,7 +191,34 @@ export default async function HomePage() {
               />
               <div className="boma-panel boma-panel--glow relative overflow-hidden rounded-[2rem] bg-card shadow-2xl shadow-boma-blue/10">
                 <div className="grid grid-cols-2 gap-2 p-3 sm:gap-3 sm:p-6">
-                  {heroBannerTiles.map((tile) => (
+                  {heroOfferTiles.length > 0
+                    ? heroOfferTiles.map((p) => (
+                    <Link
+                      key={p.id}
+                      href={`/product/${p.id}`}
+                      aria-label={`Voir l’offre : ${p.name}`}
+                      className="group boma-tile-glow flex aspect-[10/11] flex-col overflow-hidden rounded-2xl bg-boma-forest/10 transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-boma-blue/45 sm:aspect-square"
+                    >
+                      <div className="flex shrink-0 items-start px-2 pt-2 sm:px-3 sm:pt-3">
+                        <span className="text-lg font-bold leading-none text-boma-blue sm:text-2xl">
+                          {discountPctLabel(p)}
+                        </span>
+                      </div>
+                      <div className="relative mx-1.5 my-1.5 min-h-[6.25rem] flex-1 overflow-hidden rounded-lg bg-foreground/5 sm:mx-2 sm:my-2 sm:min-h-0 sm:rounded-xl">
+                        <Image
+                          src={p.image}
+                          alt=""
+                          fill
+                          className="object-contain object-center p-0.5 transition-transform duration-500 group-hover:scale-[1.02] sm:object-cover sm:p-0 sm:group-hover:scale-105"
+                          sizes="(max-width: 640px) 45vw, 180px"
+                        />
+                      </div>
+                      <span className="shrink-0 px-2 pb-2 text-[10px] font-medium leading-tight text-muted sm:px-3 sm:pb-3 sm:text-xs">
+                        Offre du jour
+                      </span>
+                    </Link>
+                    ))
+                    : heroBannerTiles.map((tile) => (
                     <div
                       key={tile.discount}
                       className="group boma-tile-glow flex aspect-[10/11] flex-col overflow-hidden rounded-2xl bg-boma-forest/10 sm:aspect-square"
@@ -197,6 +249,21 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="border-t border-foreground/5 py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="mb-10 max-w-xl">
+            <h2 className="text-3xl font-semibold tracking-tight">
+              Catégories
+            </h2>
+            <p className="mt-2 text-muted leading-relaxed">
+              Parcourez les offres par type de commerce — le même filtre s’applique
+              automatiquement sur le marché.
+            </p>
+          </div>
+          <HomeCategoryCardsList items={categoryItems} />
         </div>
       </section>
 
@@ -233,21 +300,6 @@ export default async function HomePage() {
               ))}
             </div>
           )}
-        </div>
-      </section>
-
-      <section className="border-t border-foreground/5 py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-10 max-w-xl">
-            <h2 className="text-3xl font-semibold tracking-tight">
-              Catégories
-            </h2>
-            <p className="mt-2 text-muted leading-relaxed">
-              Parcourez les offres par type de commerce — le même filtre s’applique
-              automatiquement sur le marché.
-            </p>
-          </div>
-          <HomeCategoryCardsList items={categoryItems} />
         </div>
       </section>
 
