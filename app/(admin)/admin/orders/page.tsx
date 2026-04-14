@@ -21,6 +21,8 @@ export default async function AdminOrdersPage() {
       status,
       payment_method,
       total_amount,
+      fulfillment,
+      delivery_address,
       profiles!orders_customer_id_fkey ( full_name, email, phone )
     `,
     )

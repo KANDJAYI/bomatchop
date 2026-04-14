@@ -8,6 +8,8 @@ export type SellerLayoutVendor = {
   business_type: BusinessType;
   status: string;
   profile_photo_url?: string | null;
+  /** WhatsApp retrait (restaurants), si colonne présente en base. */
+  whatsapp_phone?: string | null;
 };
 
 export async function fetchSellerVendorForLayout(
@@ -16,30 +18,47 @@ export async function fetchSellerVendorForLayout(
 ): Promise<{
   vendor: SellerLayoutVendor | null;
   profilePhotoColumnMissing: boolean;
+  whatsappColumnMissing: boolean;
 }> {
+  let profilePhotoColumnMissing = false;
+  let whatsappColumnMissing = false;
+
   let { data: vendor, error: vendorErr } = await supabase
     .from("vendors")
-    .select("id, business_name, business_type, status, profile_photo_url")
+    .select("id, business_name, business_type, status, profile_photo_url, whatsapp_phone")
     .eq("user_id", userId)
     .maybeSingle();
 
-  let profilePhotoColumnMissing = false;
   if (vendorErr && isUndefinedColumnError(vendorErr.message, "profile_photo_url")) {
     profilePhotoColumnMissing = true;
     ({ data: vendor, error: vendorErr } = await supabase
       .from("vendors")
-      .select("id, business_name, business_type, status")
+      .select("id, business_name, business_type, status, whatsapp_phone")
+      .eq("user_id", userId)
+      .maybeSingle());
+  }
+
+  if (vendorErr && isUndefinedColumnError(vendorErr.message, "whatsapp_phone")) {
+    whatsappColumnMissing = true;
+    ({ data: vendor, error: vendorErr } = await supabase
+      .from("vendors")
+      .select(
+        profilePhotoColumnMissing
+          ? "id, business_name, business_type, status"
+          : "id, business_name, business_type, status, profile_photo_url",
+      )
       .eq("user_id", userId)
       .maybeSingle());
   }
 
   if (vendorErr || !vendor) {
-    return { vendor: null, profilePhotoColumnMissing };
+    return { vendor: null, profilePhotoColumnMissing, whatsappColumnMissing };
   }
 
   return {
     vendor: vendor as SellerLayoutVendor,
     profilePhotoColumnMissing,
+    whatsappColumnMissing,
   };
 }
 

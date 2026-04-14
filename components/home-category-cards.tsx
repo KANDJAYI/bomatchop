@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  faBasketShopping,
-  faShop,
-  faUtensils,
-} from "@fortawesome/free-solid-svg-icons";
+import { faBasketShopping, faUtensils } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
@@ -13,7 +9,6 @@ import type { VendorType } from "@/lib/types";
 const CATEGORY_ICONS: Record<VendorType, IconDefinition> = {
   restaurant: faUtensils,
   supermarche: faBasketShopping,
-  boutique: faShop,
 };
 
 const ICON_RING: Record<VendorType, string> = {
@@ -21,8 +16,6 @@ const ICON_RING: Record<VendorType, string> = {
     "bg-boma-spectrum-red/15 text-boma-spectrum-red dark:bg-boma-spectrum-red/25 dark:text-boma-spectrum-red",
   supermarche:
     "bg-boma-blue/15 text-boma-blue dark:bg-boma-blue/20 dark:text-boma-blue",
-  boutique:
-    "bg-boma-spectrum-yellow/20 text-boma-forest dark:bg-boma-spectrum-yellow/25 dark:text-boma-spectrum-yellow",
 };
 
 export type HomeCategoryItem = {
@@ -35,7 +28,7 @@ export type HomeCategoryItem = {
 
 export function HomeCategoryCardsList({ items }: { items: HomeCategoryItem[] }) {
   return (
-    <ul className="grid gap-4 sm:grid-cols-3">
+    <ul className="grid gap-4 sm:grid-cols-2">
       {items.map((c) => (
         <li key={c.type}>
           <Link

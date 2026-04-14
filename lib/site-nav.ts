@@ -26,11 +26,6 @@ export function buildSiteNavItems(
     "Les offres",
     (p) => p.startsWith("/marketplace") || p.startsWith("/product/"),
   );
-  const promotions = item(
-    "/promotions",
-    "Promotions",
-    (p) => p.startsWith("/promotions"),
-  );
   const account = item("/dashboard", "Mon compte", (p) =>
     p.startsWith("/dashboard"),
   );
@@ -48,18 +43,18 @@ export function buildSiteNavItems(
   );
 
   if (!user) {
-    return [offers, promotions, account, contact];
+    return [offers, account, contact];
   }
 
   if (role === "vendor") {
-    return [offers, promotions, seller, account, contact];
+    return [offers, seller, account, contact];
   }
 
   if (role === "admin") {
-    return [offers, promotions, account, contact, admin];
+    return [offers, account, contact, admin];
   }
 
-  return [offers, promotions, account, contact];
+  return [offers, account, contact];
 }
 
 export type BurgerNavSection = {
@@ -81,11 +76,6 @@ export function buildBurgerMenuSections(
     "/marketplace",
     "Les offres",
     (p) => p.startsWith("/marketplace") || p.startsWith("/product/"),
-  );
-  const promotions = item(
-    "/promotions",
-    "Promotions",
-    (p) => p.startsWith("/promotions"),
   );
   const account = item("/dashboard", "Mon compte", (p) =>
     p.startsWith("/dashboard"),
@@ -128,6 +118,9 @@ export function buildBurgerMenuSections(
   const sellerMessages = item("/seller/messages", "Messages BOMA", (p) =>
     p.startsWith("/seller/messages"),
   );
+  const sellerParametres = item("/seller/parametres", "Paramètres", (p) =>
+    p.startsWith("/seller/parametres"),
+  );
   const sellerAccount = item("/seller/account", "Compte commerçant", (p) =>
     p.startsWith("/seller/account"),
   );
@@ -137,7 +130,7 @@ export function buildBurgerMenuSections(
       {
         id: "loading",
         title: "Chargement…",
-        items: [offers, promotions, contact],
+        items: [offers, contact],
       },
     ];
   }
@@ -147,7 +140,7 @@ export function buildBurgerMenuSections(
       {
         id: "explore",
         title: "Découvrir",
-        items: [offers, promotions],
+        items: [offers],
       },
       {
         id: "auth",
@@ -183,13 +176,14 @@ export function buildBurgerMenuSections(
           sellerProducts,
           sellerNew,
           sellerMessages,
+          sellerParametres,
           sellerAccount,
         ],
       },
       {
         id: "explore",
         title: "Marché",
-        items: [offers, promotions],
+        items: [offers],
       },
       {
         id: "account",
@@ -219,7 +213,7 @@ export function buildBurgerMenuSections(
       {
         id: "explore",
         title: "Marché",
-        items: [offers, promotions],
+        items: [offers],
       },
       {
         id: "sell",
@@ -249,7 +243,7 @@ export function buildBurgerMenuSections(
     {
       id: "explore",
       title: "Découvrir",
-      items: [offers, promotions],
+      items: [offers],
     },
     {
       id: "sell",

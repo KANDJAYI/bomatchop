@@ -2,9 +2,13 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { updateProductAction } from "@/app/auth/actions";
 import { FileUploadField } from "@/components/file-upload-field";
+import {
+  RestaurantPublishClosedBanner,
+  useRestaurantPublishWindowOpen,
+} from "@/components/seller/restaurant-publish-window-client";
 import {
   SellerDlcFields,
   SellerRestaurantTimeFields,
@@ -44,6 +48,18 @@ export function SellerProductEditForm({ product, businessType }: Props) {
   const [formKey, setFormKey] = useState(0);
   const [pending, start] = useTransition();
   const bt = businessType;
+  const [visibility, setVisibility] = useState<"draft" | "active">(
+    product.status === "draft" ? "draft" : "active",
+  );
+  const restaurantPublishOpen = useRestaurantPublishWindowOpen();
+  const restaurantActiveBlocked =
+    bt === "restaurant" &&
+    visibility === "active" &&
+    !restaurantPublishOpen;
+
+  useEffect(() => {
+    setVisibility(product.status === "draft" ? "draft" : "active");
+  }, [product.id, product.status]);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -160,6 +176,9 @@ export function SellerProductEditForm({ product, businessType }: Props) {
           <select
             name="status"
             defaultValue={product.status === "draft" ? "draft" : "active"}
+            onChange={(e) =>
+              setVisibility(e.target.value === "draft" ? "draft" : "active")
+            }
             className="boma-field rounded-2xl bg-background px-4 py-3"
           >
             <option value="active">Actif — visible sur le marché</option>
@@ -167,7 +186,13 @@ export function SellerProductEditForm({ product, businessType }: Props) {
           </select>
         </label>
 
-        {(bt === "supermarket" || bt === "boutique") && (
+        {bt === "restaurant" ? (
+          <div>
+            <RestaurantPublishClosedBanner />
+          </div>
+        ) : null}
+
+        {bt === "supermarket" && (
           <SellerDlcFields
             key={`dlc-${formKey}-${product.expires_at ?? ""}`}
             initialExpiresAt={product.expires_at}
@@ -176,9 +201,8 @@ export function SellerProductEditForm({ product, businessType }: Props) {
 
         {bt === "restaurant" && (
           <SellerRestaurantTimeFields
-            key={`rt-${formKey}-${product.prepared_at ?? ""}-${product.consume_by ?? ""}`}
+            key={`rt-${formKey}-${product.prepared_at ?? ""}`}
             initialPreparedAt={product.prepared_at}
-            initialConsumeBy={product.consume_by}
           />
         )}
 
@@ -196,7 +220,7 @@ export function SellerProductEditForm({ product, businessType }: Props) {
         ) : null}
 
         <div className="flex flex-wrap gap-3">
-          <Button type="submit" variant="forest" disabled={pending}>
+          <Button type="submit" variant="forest" disabled={pending || restaurantActiveBlocked}>
             {pending ? "Enregistrement…" : "Enregistrer les modifications"}
           </Button>
           <ButtonLink href="/seller/products" variant="secondary">

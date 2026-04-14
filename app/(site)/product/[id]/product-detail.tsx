@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
 import { useToast } from "@/context/toast-context";
+import { SupermarketDlcBlock } from "@/components/supermarket-dlc-block";
 import { labelVendorType } from "@/lib/labels-fr";
 import { formatXAF } from "@/lib/mock-products";
 import type { Product } from "@/lib/types";
@@ -73,6 +74,13 @@ export function ProductDetail({ product }: { product: Product }) {
           </p>
         </div>
         <p className="text-muted leading-relaxed">{product.description}</p>
+        {product.vendorType === "supermarche" && product.expiresAt ? (
+          <SupermarketDlcBlock
+            expiresAtIso={product.expiresAt}
+            createdAtIso={product.createdAt}
+            size="lg"
+          />
+        ) : null}
         <div className="flex flex-wrap items-baseline gap-3">
           <span className="text-3xl font-bold text-boma-blue">
             {formatXAF(product.pricePromo)}

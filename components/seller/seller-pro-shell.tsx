@@ -57,6 +57,11 @@ function buildNavSections(approved: boolean): NavSection[] {
     label: "Messages BOMA",
     icon: IconMail,
   };
+  const settings: NavItem = {
+    href: "/seller/parametres",
+    label: "Paramètres",
+    icon: IconSettings,
+  };
   const account: NavItem = {
     href: "/seller/account",
     label: "Mon compte",
@@ -74,7 +79,10 @@ function buildNavSections(approved: boolean): NavSection[] {
           { title: "Plateforme", items: [messages] } as NavSection,
         ]
       : []),
-    { title: "Compte", items: [account] },
+    {
+      title: "Compte",
+      items: approved ? [settings, account] : [account],
+    },
   ];
   return sections.filter((s) => s.items.length > 0);
 }
@@ -82,6 +90,7 @@ function buildNavSections(approved: boolean): NavSection[] {
 function titleForPath(pathname: string): string {
   if (pathname === "/seller") return "Tableau de bord";
   if (pathname === "/seller/products/new") return "Nouvelle offre";
+  if (pathname === "/seller/parametres") return "Paramètres";
   if (pathname.startsWith("/seller/products/") && pathname.endsWith("/edit")) {
     return "Modifier l’offre";
   }
@@ -392,6 +401,19 @@ export function SellerProShell({
         </div>
       </div>
     </div>
+  );
+}
+
+function IconSettings({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
   );
 }
 

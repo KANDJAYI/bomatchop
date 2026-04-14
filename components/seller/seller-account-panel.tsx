@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateSellerProfileAction } from "@/app/auth/actions";
 import { SellerProfilePhotoForm } from "@/components/seller/seller-profile-photo-form";
+import { SellerShopLocationPicker } from "@/components/seller/seller-shop-location-picker";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/context/toast-context";
 import {
@@ -25,6 +26,8 @@ type Props = {
     location: string;
     phone: string;
     profile_photo_url?: string | null;
+    latitude: number | null;
+    longitude: number | null;
   };
   hasProfilePhoto: boolean;
   profilePhotoColumnMissing: boolean;
@@ -139,6 +142,26 @@ export function SellerAccountPanel({
               <dd className="font-medium">{vendor.phone}</dd>
             </div>
           </dl>
+        </section>
+
+        <section className="rounded-3xl border border-zinc-200/90 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50 sm:p-8">
+          <h2 className="text-lg font-semibold tracking-tight">
+            Point de retrait sur la carte
+          </h2>
+          <p className="mt-1 text-sm text-muted">
+            Définissez l’entrée ou le point de retrait exact : les clients voient
+            l’itinéraire réel et le temps de trajet estimé jusqu’à ce marqueur lors du
+            paiement.
+          </p>
+          <div className="mt-6">
+            <SellerShopLocationPicker
+              initialLatitude={vendor.latitude}
+              initialLongitude={vendor.longitude}
+              canEdit={
+                vendor.status === "pending" || vendor.status === "approved"
+              }
+            />
+          </div>
         </section>
 
         {!profilePhotoColumnMissing ? (

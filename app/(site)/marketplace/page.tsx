@@ -8,8 +8,11 @@ function parseMarketplaceType(
   raw: string | string[] | undefined,
 ): "all" | VendorType {
   const v = Array.isArray(raw) ? raw[0] : raw;
-  if (v === "restaurant" || v === "supermarche" || v === "boutique") {
+  if (v === "restaurant" || v === "supermarche") {
     return v;
+  }
+  if (v === "boutique") {
+    return "all";
   }
   return "all";
 }

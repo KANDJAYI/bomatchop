@@ -7,6 +7,7 @@ import { useTransition } from "react";
 import { deleteProductAction } from "@/app/auth/actions";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { useToast } from "@/context/toast-context";
+import { SupermarketDlcBlock } from "@/components/supermarket-dlc-block";
 import { labelProductStatus } from "@/lib/labels-fr";
 import { formatXAF } from "@/lib/mock-products";
 
@@ -22,6 +23,8 @@ export type SellerCatalogProduct = {
   status: string;
   image_url: string | null;
   created_at: string;
+  /** DLC supermarché (timestamptz ISO), null pour restaurant ou ancienne ligne. */
+  expires_at?: string | null;
 };
 
 type Props = {
@@ -53,12 +56,14 @@ export function SellerProductGrid({ products, variant = "full" }: Props) {
     <div className="overflow-hidden rounded-3xl border border-zinc-200/90 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50 sm:p-8">
       <div className="flex flex-col gap-2 border-b border-zinc-100 px-6 pb-5 pt-6 dark:border-zinc-800/80 sm:flex-row sm:items-end sm:justify-between sm:px-8 sm:pt-8">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight">Catalogue en ligne</h2>
-          <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted">
+          <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+            Catalogue en ligne
+          </h2>
+          <p className="mt-1 max-w-xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
             Aperçu côté clients — prix promo conforme aux règles BOMA.
           </p>
         </div>
-        <p className="shrink-0 rounded-full border border-zinc-200/90 bg-zinc-50 px-3 py-1 text-xs font-semibold tabular-nums text-muted dark:border-zinc-700 dark:bg-zinc-800/80">
+        <p className="shrink-0 rounded-full border border-zinc-200/90 bg-zinc-50 px-3 py-1 text-xs font-semibold tabular-nums text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800/80 dark:text-zinc-300">
           {products.length} réf.{products.length > 1 ? "s" : ""}
         </p>
       </div>
@@ -68,10 +73,10 @@ export function SellerProductGrid({ products, variant = "full" }: Props) {
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-400 dark:border-zinc-700 dark:bg-zinc-900">
             <IconEmptyCatalog className="h-6 w-6" />
           </div>
-          <p className="mt-4 text-sm font-semibold text-foreground">
+          <p className="mt-4 text-sm font-semibold text-zinc-900 dark:text-zinc-50">
             {variant === "compact" ? "Aucune offre pour l’instant" : "Aucune offre publiée"}
           </p>
-          <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted">
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
             {variant === "compact" ? (
               <>
                 Créez une offre depuis{" "}
@@ -90,7 +95,7 @@ export function SellerProductGrid({ products, variant = "full" }: Props) {
         </div>
       ) : variant === "full" ? (
         <div className="overflow-x-auto px-0 pb-6 pt-2 sm:px-0 sm:pb-8 sm:pt-4">
-          <table className="w-full min-w-[58rem] border-collapse text-left text-sm">
+          <table className="w-full min-w-[68rem] border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-zinc-200 bg-zinc-50/95 text-xs font-semibold uppercase tracking-wide text-muted dark:border-zinc-800 dark:bg-zinc-900/90">
                 <th className="whitespace-nowrap px-4 py-3 pl-6 sm:pl-8" scope="col">
@@ -98,6 +103,9 @@ export function SellerProductGrid({ products, variant = "full" }: Props) {
                 </th>
                 <th className="whitespace-nowrap px-4 py-3" scope="col">
                   Offre
+                </th>
+                <th className="min-w-[12rem] px-4 py-3" scope="col">
+                  Expiration (DLC)
                 </th>
                 <th className="whitespace-nowrap px-4 py-3" scope="col">
                   Statut
@@ -123,9 +131,9 @@ export function SellerProductGrid({ products, variant = "full" }: Props) {
               {products.map((p) => (
                 <tr
                   key={p.id}
-                  className="bg-white whitespace-nowrap transition-colors hover:bg-zinc-50/80 dark:bg-transparent dark:hover:bg-zinc-900/50"
+                  className="bg-white transition-colors hover:bg-zinc-50/80 dark:bg-zinc-950/40 dark:hover:bg-zinc-900/60"
                 >
-                  <td className="px-4 py-3 pl-6 align-middle sm:pl-8">
+                  <td className="whitespace-nowrap px-4 py-3 pl-6 align-middle sm:pl-8">
                     <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-foreground/5 ring-1 ring-zinc-200/80 dark:ring-zinc-700">
                       <Image
                         src={p.image_url || PLACEHOLDER}
@@ -136,15 +144,26 @@ export function SellerProductGrid({ products, variant = "full" }: Props) {
                       />
                     </div>
                   </td>
-                  <td className="min-w-[10rem] max-w-[20rem] px-4 py-3 align-middle">
+                  <td className="min-w-[10rem] max-w-[20rem] whitespace-nowrap px-4 py-3 align-middle">
                     <p
-                      className="truncate font-semibold text-foreground"
+                      className="truncate font-semibold text-zinc-900 dark:text-zinc-50"
                       title={p.name}
                     >
                       {p.name}
                     </p>
                   </td>
-                  <td className="px-4 py-3 align-middle">
+                  <td className="max-w-[20rem] whitespace-normal px-4 py-3 align-top">
+                    {p.expires_at ? (
+                      <SupermarketDlcBlock
+                        expiresAtIso={p.expires_at}
+                        createdAtIso={p.created_at}
+                        size="sm"
+                      />
+                    ) : (
+                      <span className="text-sm text-zinc-500 dark:text-zinc-400">—</span>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 align-middle">
                     <div className="flex max-w-[20rem] flex-nowrap items-center gap-2">
                       <span className="shrink-0 rounded-full bg-boma-forest/12 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-boma-forest dark:bg-emerald-500/15 dark:text-emerald-300">
                         {labelProductStatus(p.status)}
@@ -156,23 +175,23 @@ export function SellerProductGrid({ products, variant = "full" }: Props) {
                       ) : null}
                     </div>
                   </td>
-                  <td className="px-4 py-3 align-middle font-semibold tabular-nums text-boma-blue">
+                  <td className="whitespace-nowrap px-4 py-3 align-middle font-semibold tabular-nums text-boma-blue">
                     {formatXAF(Number(p.price_promo))}
                   </td>
-                  <td className="px-4 py-3 align-middle tabular-nums text-muted line-through">
+                  <td className="whitespace-nowrap px-4 py-3 align-middle tabular-nums text-zinc-500 line-through dark:text-zinc-500">
                     {formatXAF(Number(p.price_original))}
                   </td>
-                  <td className="px-4 py-3 align-middle font-medium tabular-nums text-foreground">
+                  <td className="whitespace-nowrap px-4 py-3 align-middle font-medium tabular-nums text-zinc-900 dark:text-zinc-100">
                     {p.stock}
                   </td>
-                  <td className="px-4 py-3 align-middle text-muted">
+                  <td className="whitespace-nowrap px-4 py-3 align-middle text-zinc-600 dark:text-zinc-400">
                     {new Date(p.created_at).toLocaleDateString("fr-FR", {
                       day: "numeric",
                       month: "short",
                       year: "numeric",
                     })}
                   </td>
-                  <td className="px-4 py-3 pr-6 text-right align-middle sm:pr-8">
+                  <td className="whitespace-nowrap px-4 py-3 pr-6 text-right align-middle sm:pr-8">
                     <div className="inline-flex flex-nowrap items-center justify-end gap-2">
                       <ButtonLink
                         href={`/seller/products/${p.id}/edit`}
@@ -202,7 +221,7 @@ export function SellerProductGrid({ products, variant = "full" }: Props) {
           {products.map((p) => (
             <li
               key={p.id}
-              className="flex flex-col overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/40"
+              className="flex flex-col overflow-hidden rounded-2xl border border-zinc-200/90 bg-white text-zinc-900 shadow-sm transition-shadow hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
             >
               <div className="relative aspect-[4/3] w-full bg-foreground/5">
                 <Image
@@ -223,10 +242,18 @@ export function SellerProductGrid({ products, variant = "full" }: Props) {
               </div>
               <div className="flex flex-1 flex-col gap-2 p-3 sm:gap-3 sm:p-4">
                 <div>
-                  <h3 className="font-semibold leading-snug text-foreground line-clamp-2">
+                  <h3 className="line-clamp-2 font-semibold leading-snug text-zinc-900 dark:text-zinc-50">
                     {p.name}
                   </h3>
-                  <p className="mt-1 text-[11px] text-muted">
+                  {p.expires_at ? (
+                    <SupermarketDlcBlock
+                      expiresAtIso={p.expires_at}
+                      createdAtIso={p.created_at}
+                      size="sm"
+                      className="mt-2"
+                    />
+                  ) : null}
+                  <p className="mt-2 text-[11px] text-zinc-600 dark:text-zinc-400">
                     Ajouté le{" "}
                     {new Date(p.created_at).toLocaleDateString("fr-FR", {
                       day: "numeric",
@@ -240,10 +267,10 @@ export function SellerProductGrid({ products, variant = "full" }: Props) {
                     <p className="text-lg font-bold text-boma-blue">
                       {formatXAF(Number(p.price_promo))}
                     </p>
-                    <p className="text-xs text-muted line-through">
+                    <p className="text-xs text-zinc-500 line-through dark:text-zinc-500">
                       {formatXAF(Number(p.price_original))}
                     </p>
-                    <p className="mt-1 text-xs font-medium text-muted">
+                    <p className="mt-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
                       Stock : {p.stock}
                     </p>
                   </div>

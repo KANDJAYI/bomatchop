@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/restaurant-midnight-purge",
       "schedule": "0 23 * * *"
+    },
+    {
+      "path": "/api/cron/supermarket-publication-purge",
+      "schedule": "15 0 * * *"
     }
   ]
 }

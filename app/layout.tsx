@@ -20,6 +20,10 @@ export const metadata: Metadata = {
   },
   description:
     "Achetez des produits et plats à prix réduits près de chez vous. Réduisons le gaspillage ensemble.",
+  icons: {
+    icon: [{ url: "/logobomatchop-removebg-preview.png", type: "image/png" }],
+    apple: [{ url: "/logobomatchop-removebg-preview.png", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({

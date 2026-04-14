@@ -1,4 +1,5 @@
 import { SiteChrome } from "@/components/site-chrome";
+import { SiteProviders } from "@/components/site-providers";
 
 export default function SiteLayout({
   children,
@@ -6,6 +7,8 @@ export default function SiteLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SiteChrome>{children}</SiteChrome>
+    <SiteProviders>
+      <SiteChrome>{children}</SiteChrome>
+    </SiteProviders>
   );
 }

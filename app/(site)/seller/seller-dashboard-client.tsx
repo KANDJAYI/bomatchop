@@ -104,20 +104,26 @@ export function SellerDashboardClient({
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8">
-      <div className="relative overflow-hidden rounded-3xl border border-zinc-200/90 bg-white px-6 py-7 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50 sm:px-8 sm:py-8">
-        <div className="pointer-events-none absolute -right-16 -top-24 h-56 w-56 rounded-full bg-boma-blue/[0.07] blur-2xl dark:bg-boma-blue/15" />
-        <div className="pointer-events-none absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-boma-forest/[0.06] blur-2xl dark:bg-boma-forest/20" />
+      <div className="relative overflow-hidden rounded-3xl border border-zinc-200 bg-white px-6 py-7 shadow-md shadow-zinc-900/[0.04] dark:border-zinc-700 dark:bg-zinc-900 sm:px-8 sm:py-8">
+        <div className="pointer-events-none absolute -right-16 -top-24 h-56 w-56 rounded-full bg-boma-blue/[0.1] blur-2xl dark:bg-boma-blue/20" />
+        <div className="pointer-events-none absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-boma-forest/[0.08] blur-2xl dark:bg-emerald-900/25" />
         <div className="relative">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500 dark:text-zinc-400">
             Bonjour — pilotage quotidien
           </p>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
             Vue d’ensemble de votre activité sur BOMA. Détail du catalogue dans{" "}
-            <Link href="/seller/products" className="font-medium text-boma-blue hover:underline">
+            <Link
+              href="/seller/products"
+              className="font-semibold text-boma-blue underline-offset-2 hover:underline dark:text-sky-400"
+            >
               Mes produits
             </Link>
             , traitement des ventes dans{" "}
-            <Link href="/seller/orders" className="font-medium text-boma-blue hover:underline">
+            <Link
+              href="/seller/orders"
+              className="font-semibold text-boma-blue underline-offset-2 hover:underline dark:text-sky-400"
+            >
               Commandes
             </Link>
             .

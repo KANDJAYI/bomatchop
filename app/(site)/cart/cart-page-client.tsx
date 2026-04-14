@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ButtonLink } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
 import { groupCartLinesByVendor } from "@/lib/cart-vendor-groups";
+import { SupermarketDlcBlock } from "@/components/supermarket-dlc-block";
 import { formatXAF } from "@/lib/mock-products";
 
 export function CartPageClient() {
@@ -71,6 +72,14 @@ export function CartPageClient() {
                 {product.name}
               </Link>
               <p className="text-xs text-muted">{product.vendorName}</p>
+              {product.vendorType === "supermarche" && product.expiresAt ? (
+                <SupermarketDlcBlock
+                  expiresAtIso={product.expiresAt}
+                  createdAtIso={product.createdAt}
+                  size="sm"
+                  className="mt-2"
+                />
+              ) : null}
               <p className="mt-2 font-bold text-boma-blue">
                 {formatXAF(product.pricePromo)}
               </p>
@@ -125,33 +134,13 @@ export function CartPageClient() {
           <span className="text-boma-blue">{formatXAF(total)}</span>
         </div>
         <p className="mt-4 text-xs font-medium text-muted">
-          Paiement à la livraison ou mobile money :
+          Paiement à la livraison (espèces au retrait) :
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <span className="relative inline-block h-10 w-[120px] overflow-hidden rounded-md opacity-90">
             <Image
               src="/payments/cash-delivery.webp"
               alt="Paiement à la livraison"
-              width={240}
-              height={52}
-              className="h-10 w-auto object-contain object-left"
-              unoptimized
-            />
-          </span>
-          <span className="relative inline-block h-10 w-[120px] overflow-hidden rounded-md">
-            <Image
-              src="/payments/airtel-money.webp"
-              alt="Airtel Money"
-              width={240}
-              height={52}
-              className="h-10 w-auto object-contain object-left"
-              unoptimized
-            />
-          </span>
-          <span className="relative inline-block h-10 w-[120px] overflow-hidden rounded-md">
-            <Image
-              src="/payments/moov-money.webp"
-              alt="Moov Money"
               width={240}
               height={52}
               className="h-10 w-auto object-contain object-left"

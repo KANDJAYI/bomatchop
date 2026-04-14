@@ -33,12 +33,6 @@ function addDays(d: Date, days: number) {
   return x;
 }
 
-function addHours(d: Date, hours: number) {
-  const x = new Date(d);
-  x.setTime(x.getTime() + hours * 3600000);
-  return x;
-}
-
 function mergeLocalDateTime(dateStr: string, timeStr: string) {
   if (!dateStr) return "";
   const t = timeStr?.length >= 4 ? timeStr : "12:00";
@@ -57,7 +51,7 @@ function dlcInitialState(initialExpiresAt?: string | null) {
   return { date: toDateInputValue(addDays(new Date(), 30)), time: "23:59" };
 }
 
-/** DLC supermarché / boutique : date + heure + raccourcis +14 / +30 / +60 jours */
+/** DLC supermarché : date + heure + raccourcis +14 / +30 / +60 jours */
 export function SellerDlcFields({ initialExpiresAt }: DlcProps) {
   const init = dlcInitialState(initialExpiresAt);
   const [date, setDate] = useState(init.date);
@@ -76,8 +70,11 @@ export function SellerDlcFields({ initialExpiresAt }: DlcProps) {
     <div className="space-y-3">
       <span className="text-sm font-medium">Date limite de consommation (DLC)</span>
       <p className="text-xs text-muted leading-relaxed">
-        Minimum <strong>14 jours</strong> après aujourd’hui pour être accepté. Heure
-        souvent fixée en fin de journée (ex. 23:59).
+        Minimum <strong>14 jours</strong> après aujourd’hui pour être accepté. La réduction
+        sur le prix normal dépend de l’écart jusqu’à la DLC au moment de la publication :{" "}
+        <strong>−20 %</strong> à partir de 2 mois, <strong>−30 %</strong> entre 1 et 2 mois,{" "}
+        <strong>−50 %</strong> entre 2 semaines et 1 mois. Heure souvent en fin de journée
+        (ex. 23:59).
       </p>
       <div className="flex flex-wrap gap-2">
         <PresetChip label="+14 jours (min.)" onClick={() => applyPreset(14)} />
@@ -119,66 +116,20 @@ export function SellerDlcFields({ initialExpiresAt }: DlcProps) {
 type RestaurantProps = {
   /** Remonter avec une `key` pour réinitialiser (ex. `formKey`). */
   initialPreparedAt?: string | null;
-  initialConsumeBy?: string | null;
 };
 
-function restaurantInitialState(
-  initialPreparedAt?: string | null,
-  initialConsumeBy?: string | null,
-) {
+function restaurantPrepInitialState(initialPreparedAt?: string | null) {
   const prep = localPartsFromIso(initialPreparedAt);
-  const cons = localPartsFromIso(initialConsumeBy);
-  if (prep && cons) {
-    return {
-      prepDate: prep.date,
-      prepTime: prep.time,
-      consumeDate: cons.date,
-      consumeTime: cons.time,
-    };
-  }
+  if (prep) return { prepDate: prep.date, prepTime: prep.time };
   const n = new Date();
-  const c = addHours(n, 6);
-  return {
-    prepDate: toDateInputValue(n),
-    prepTime: toTimeInputValue(n),
-    consumeDate: toDateInputValue(c),
-    consumeTime: toTimeInputValue(c),
-  };
+  return { prepDate: toDateInputValue(n), prepTime: toTimeInputValue(n) };
 }
 
-/** Restaurant : heure de préparation + heure d’expiration (toutes deux obligatoires) */
-export function SellerRestaurantTimeFields({
-  initialPreparedAt,
-  initialConsumeBy,
-}: RestaurantProps) {
-  const init = restaurantInitialState(initialPreparedAt, initialConsumeBy);
+/** Restaurant : heure de préparation uniquement (fin de journée / limite imposée côté serveur). */
+export function SellerRestaurantTimeFields({ initialPreparedAt }: RestaurantProps) {
+  const init = restaurantPrepInitialState(initialPreparedAt);
   const [prepDate, setPrepDate] = useState(init.prepDate);
   const [prepTime, setPrepTime] = useState(init.prepTime);
-  const [consumeDate, setConsumeDate] = useState(init.consumeDate);
-  const [consumeTime, setConsumeTime] = useState(init.consumeTime);
-
-  function setConsumeFromHoursAhead(h: number) {
-    const c = addHours(new Date(), h);
-    setConsumeDate(toDateInputValue(c));
-    setConsumeTime(toTimeInputValue(c));
-  }
-
-  function setConsumeTonightAt(hour: number, minute = 0) {
-    const c = new Date();
-    c.setHours(hour, minute, 0, 0);
-    if (c.getTime() <= Date.now()) {
-      c.setDate(c.getDate() + 1);
-    }
-    setConsumeDate(toDateInputValue(c));
-    setConsumeTime(toTimeInputValue(c));
-  }
-
-  function setTomorrowAt(hour: number, minute = 0) {
-    const c = addDays(new Date(), 1);
-    c.setHours(hour, minute, 0, 0);
-    setConsumeDate(toDateInputValue(c));
-    setConsumeTime(toTimeInputValue(c));
-  }
 
   function setPrepNow() {
     const n = new Date();
@@ -187,101 +138,42 @@ export function SellerRestaurantTimeFields({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl bg-boma-blue/[0.06] px-4 py-3 text-xs leading-relaxed text-muted dark:bg-boma-blue/10">
-        <strong className="text-foreground">Règles restaurant (BOMA)</strong>
-        <ul className="mt-2 list-inside list-disc space-y-1">
-          <li>
-            <strong>Prix au moment de la publication</strong> (heure du marché, fuseau Libreville
-            par défaut) : avant 22 h, réduction <strong>25 %</strong> (prix affiché = 75 % du prix
-            catalogue) ; à partir de 22 h, réduction <strong>50 %</strong> (prix affiché = 50 %).
-          </li>
-          <li>
-            Chaque <strong>minuit</strong>, les plats encore en ligne sont retirés du marché ; vous
-            pourrez les republier le jour suivant.
-          </li>
-        </ul>
+    <div className="space-y-3">
+      <span className="text-sm font-medium">Heure de préparation</span>
+      <p className="text-xs text-muted leading-relaxed">
+        <strong>Obligatoire.</strong> Indiquez quand le plat est (ou sera) prêt. Les clients
+        s’en servent pour organiser le retrait.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <PresetChip label="Maintenant" onClick={setPrepNow} />
       </div>
-      <div className="space-y-3">
-        <span className="text-sm font-medium">Heure de préparation</span>
-        <p className="text-xs text-muted leading-relaxed">
-          <strong>Obligatoire.</strong> Date et heure auxquelles le plat a été (ou sera)
-          prêt. Les clients voient cette information pour organiser le retrait.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <PresetChip label="Maintenant" onClick={setPrepNow} />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-1.5 text-sm font-medium">
-            <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-              Jour
-            </span>
-            <input
-              type="date"
-              required
-              value={prepDate}
-              onChange={(e) => setPrepDate(e.target.value)}
-              className="boma-field min-h-12 rounded-2xl bg-background px-3 py-3 text-base"
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm font-medium">
-            <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-              Heure
-            </span>
-            <input
-              type="time"
-              required
-              value={prepTime}
-              onChange={(e) => setPrepTime(e.target.value)}
-              className="boma-field min-h-12 rounded-2xl bg-background px-3 py-3 text-base"
-            />
-          </label>
-        </div>
-        <HiddenMerged name="prepared_at" date={prepDate} time={prepTime} />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="flex flex-col gap-1.5 text-sm font-medium">
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+            Jour
+          </span>
+          <input
+            type="date"
+            required
+            value={prepDate}
+            onChange={(e) => setPrepDate(e.target.value)}
+            className="boma-field min-h-12 rounded-2xl bg-background px-3 py-3 text-base"
+          />
+        </label>
+        <label className="flex flex-col gap-1.5 text-sm font-medium">
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+            Heure
+          </span>
+          <input
+            type="time"
+            required
+            value={prepTime}
+            onChange={(e) => setPrepTime(e.target.value)}
+            className="boma-field min-h-12 rounded-2xl bg-background px-3 py-3 text-base"
+          />
+        </label>
       </div>
-
-      <div className="space-y-3 pt-5">
-        <span className="text-sm font-medium">Heure d’expiration</span>
-        <p className="text-xs text-muted leading-relaxed">
-          <strong>Obligatoire.</strong> Date et heure limite pour consommer le plat. Doit
-          être <strong>après</strong> la préparation, avec <strong>au moins 2 h</strong> et{" "}
-          <strong>au plus 24 h</strong> entre les deux. L’expiration doit aussi être entre
-          2 h et 24 h <strong>à partir de maintenant</strong>.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <PresetChip label="Dans 3 h" onClick={() => setConsumeFromHoursAhead(3)} />
-          <PresetChip label="Dans 6 h" onClick={() => setConsumeFromHoursAhead(6)} />
-          <PresetChip label="Ce soir 20h" onClick={() => setConsumeTonightAt(20, 0)} />
-          <PresetChip label="Demain midi" onClick={() => setTomorrowAt(12, 0)} />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-1.5 text-sm font-medium">
-            <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-              Jour
-            </span>
-            <input
-              type="date"
-              required
-              value={consumeDate}
-              onChange={(e) => setConsumeDate(e.target.value)}
-              className="boma-field min-h-12 rounded-2xl bg-background px-3 py-3 text-base"
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm font-medium">
-            <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-              Heure
-            </span>
-            <input
-              type="time"
-              required
-              value={consumeTime}
-              onChange={(e) => setConsumeTime(e.target.value)}
-              className="boma-field min-h-12 rounded-2xl bg-background px-3 py-3 text-base"
-            />
-          </label>
-        </div>
-        <HiddenMerged name="consume_by" date={consumeDate} time={consumeTime} />
-      </div>
+      <HiddenMerged name="prepared_at" date={prepDate} time={prepTime} />
     </div>
   );
 }

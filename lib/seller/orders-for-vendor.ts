@@ -18,13 +18,17 @@ export type SellerOrderView = {
   /** Sous-total des lignes visibles pour ce vendeur */
   vendor_subtotal: number;
   vendor_count: number;
-  /** false si order_distinct_vendor_count a échoué — ne pas traiter comme multi-boutiques. */
+  /** false si order_distinct_vendor_count a échoué — ne pas traiter comme multi-commerces. */
   vendor_count_reliable: boolean;
   customer: {
     full_name: string | null;
     phone: string | null;
     email: string | null;
   };
+  /** Adresse / consignes saisies au checkout (livraison à domicile). */
+  delivery_address: string | null;
+  /** home_delivery ou pickup (retrait au commerce). */
+  fulfillment: string;
   lines: SellerOrderLine[];
 };
 
@@ -37,6 +41,8 @@ type RawRow = {
     status: string;
     payment_method: string;
     total_amount: number;
+    delivery_address: string | null;
+    fulfillment: string;
     profiles: {
       full_name: string | null;
       phone: string | null;
@@ -72,6 +78,8 @@ export async function fetchOrdersForVendor(
         status,
         payment_method,
         total_amount,
+        delivery_address,
+        fulfillment,
         profiles!orders_customer_id_fkey ( full_name, phone, email )
       ),
       products!inner ( id, name, image_url, vendor_id )
@@ -118,6 +126,8 @@ export async function fetchOrdersForVendor(
           phone: prof?.phone ?? null,
           email: prof?.email ?? null,
         },
+        delivery_address: o.delivery_address?.trim() || null,
+        fulfillment: o.fulfillment ?? "home_delivery",
         lines: [line],
       });
     }

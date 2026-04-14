@@ -6,7 +6,11 @@ import {
   adminUpdateOrderStatus,
   type AdminOrderStatus,
 } from "@/app/auth/actions";
-import { labelOrderStatus, labelPaymentMethod } from "@/lib/labels-fr";
+import {
+  labelOrderFulfillment,
+  labelOrderStatus,
+  labelPaymentMethod,
+} from "@/lib/labels-fr";
 
 export type OrderAdminRow = {
   id: string;
@@ -14,6 +18,8 @@ export type OrderAdminRow = {
   status: string;
   payment_method: string;
   total_amount: number;
+  fulfillment?: string | null;
+  delivery_address?: string | null;
   profiles: {
     full_name: string | null;
     email: string | null;
@@ -56,11 +62,12 @@ export function AdminOrdersTable({ orders }: { orders: OrderAdminRow[] }) {
   return (
     <div className="admin-panel overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-[#12161c]">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[860px] text-left text-sm">
+        <table className="w-full min-w-[960px] text-left text-sm">
           <thead className="border-b border-slate-200/90 bg-slate-50/90 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-slate-400">
             <tr>
               <th className="px-5 py-3.5">Réf.</th>
               <th className="px-5 py-3.5">Client</th>
+              <th className="px-5 py-3.5">Réception</th>
               <th className="px-5 py-3.5">Paiement</th>
               <th className="px-5 py-3.5">Montant</th>
               <th className="px-5 py-3.5">Date</th>
@@ -83,6 +90,19 @@ export function AdminOrdersTable({ orders }: { orders: OrderAdminRow[] }) {
                     <span className="mt-0.5 block text-xs text-slate-500">
                       {c?.email ?? ""}
                     </span>
+                  </td>
+                  <td className="max-w-[14rem] px-5 py-4 text-xs text-slate-600 dark:text-slate-400">
+                    <span className="font-medium text-slate-800 dark:text-slate-200">
+                      {labelOrderFulfillment(o.fulfillment ?? "home_delivery")}
+                    </span>
+                    {o.delivery_address?.trim() ? (
+                      <span
+                        className="mt-1 line-clamp-2 block text-[11px] text-slate-500"
+                        title={o.delivery_address}
+                      >
+                        {o.delivery_address}
+                      </span>
+                    ) : null}
                   </td>
                   <td className="px-5 py-4 text-slate-600 dark:text-slate-400">
                     {labelPaymentMethod(o.payment_method)}

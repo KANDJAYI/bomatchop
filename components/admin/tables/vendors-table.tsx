@@ -280,7 +280,7 @@ function VendorDossierPanel({
             }
           />
           <DossierField
-            label="Référence fichier — photo boutique"
+            label="Référence fichier — photo devanture"
             value={
               <span className="break-all font-mono text-[11px] text-slate-600 dark:text-slate-400">
                 {v.storefront_photo_url ?? "—"}
@@ -297,7 +297,7 @@ function VendorDossierPanel({
             loading={docsLoading}
           />
           <DocumentPreview
-            title="Photo de la devanture / boutique"
+            title="Photo de la devanture du commerce"
             storagePath={v.storefront_photo_url}
             signedUrl={docCache?.storefrontUrl ?? null}
             loading={docsLoading}

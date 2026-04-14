@@ -71,12 +71,6 @@ const homeCategories: {
     accentClass:
       "bg-gradient-to-br from-boma-blue/15 via-transparent to-boma-spectrum-green/12",
   },
-  {
-    type: "boutique",
-    description: "Épicerie fine et spécialités locales.",
-    accentClass:
-      "bg-gradient-to-br from-boma-spectrum-yellow/20 via-transparent to-boma-spectrum-red/10",
-  },
 ];
 
 function pickBestOffers(products: Product[], limit = 6): Product[] {
@@ -233,7 +227,7 @@ export default async function HomePage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               {bestOffers.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}

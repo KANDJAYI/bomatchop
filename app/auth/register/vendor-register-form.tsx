@@ -39,7 +39,6 @@ function VendorSessionRedirect() {
 
 const BUSINESS_OPTIONS: { value: BusinessType; label: string }[] = [
   { value: "restaurant", label: "Restaurant" },
-  { value: "boutique", label: "Boutique" },
   { value: "supermarket", label: "Supermarché" },
 ];
 

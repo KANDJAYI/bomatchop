@@ -8,10 +8,13 @@ import { createClient } from "@/lib/supabase/client";
 import type { BusinessType } from "@/lib/types";
 
 function normalizeBusinessType(raw: string | undefined): BusinessType {
-  if (raw === "restaurant" || raw === "boutique" || raw === "supermarket") {
+  if (raw === "restaurant" || raw === "supermarket") {
     return raw;
   }
-  return "boutique";
+  if (raw === "boutique") {
+    return "supermarket";
+  }
+  return "supermarket";
 }
 
 export function VendorApplicationForm() {
@@ -67,7 +70,7 @@ export function VendorApplicationForm() {
     const profileFile = profileInput?.files?.[0];
     if (!idFile?.size || !storeFile?.size || !profileFile?.size) {
       setError(
-        "Joignez la pièce d’identité, la photo de la boutique et votre photo de profil (portrait).",
+        "Joignez la pièce d’identité, la photo de votre commerce et votre photo de profil (portrait).",
       );
       return;
     }
@@ -90,7 +93,7 @@ export function VendorApplicationForm() {
     setMessage(null);
 
     const idPath = `${user.id}/piece-identite`;
-    const storePath = `${user.id}/boutique`;
+    const storePath = `${user.id}/devanture`;
     const profileExt =
       profileFile.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") ||
       "jpg";
@@ -142,7 +145,7 @@ export function VendorApplicationForm() {
       firstName: String(fd.get("first_name") ?? ""),
       lastName: String(fd.get("last_name") ?? ""),
       businessName: String(fd.get("business_name") ?? ""),
-      businessType: String(fd.get("business_type") ?? "boutique") as BusinessType,
+      businessType: String(fd.get("business_type") ?? "supermarket") as BusinessType,
       location: String(fd.get("location") ?? ""),
       phone: String(fd.get("phone") ?? ""),
       idDocumentPath: idPath,
@@ -206,7 +209,6 @@ export function VendorApplicationForm() {
           className="boma-field rounded-2xl bg-background px-4 py-3"
         >
           <option value="restaurant">Restaurant</option>
-          <option value="boutique">Boutique</option>
           <option value="supermarket">Supermarché</option>
         </select>
       </label>

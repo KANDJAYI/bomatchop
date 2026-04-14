@@ -14,7 +14,7 @@ Tu dois construire une application moderne appelée **BOMA**, avec une logique m
 
 BOMA est une plateforme qui permet :
 
-* aux **supermarchés, boutiques et restaurants** de vendre leurs produits à prix réduits
+* aux **supermarchés et restaurants** de vendre leurs produits à prix réduits
 * aux **clients** d’acheter des produits alimentaires à moindre coût
 * de **réduire le gaspillage alimentaire**
 
@@ -48,13 +48,12 @@ BOMA est une plateforme qui permet :
 * Type activité :
 
   * restaurant
-  * boutique
   * supermarché
 * Nom activité
 * Localisation
 * Téléphone
 * Photo pièce identité
-* Photo boutique
+* Photo devanture du commerce
 
 👉 Statut par défaut : **pending (validation admin)**
 
@@ -65,10 +64,6 @@ BOMA est une plateforme qui permet :
 ## 💳 Paiement :
 
 * Paiement à la livraison
-* Paiement mobile :
-
-  * Airtel Money
-  * Moov Money
 
 ---
 
@@ -88,12 +83,12 @@ Créer un système de scoring :
 
 ## 🏬 SUPERMARCHÉS
 
-### Réduction automatique :
+### Réduction automatique (selon l’écart DLC au moment de la publication) :
 
-* 2 mois → -80%
-* 1 mois → -60%
-* 2 semaines → -40%
-* < 2 semaines → REFUS
+* à partir de 2 mois avant la DLC → **−20 %** du prix normal
+* entre 1 et 2 mois avant la DLC → **−30 %**
+* entre 2 semaines et 1 mois avant la DLC → **−50 %**
+* moins de 2 semaines avant la DLC → **REFUS**
 
 ---
 

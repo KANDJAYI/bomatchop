@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { ButtonLink } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
 import { groupCartLinesByVendor } from "@/lib/cart-vendor-groups";
+import { SupermarketDlcBlock } from "@/components/supermarket-dlc-block";
 import { formatXAF } from "@/lib/mock-products";
 
 export function CartSidebar() {
@@ -145,6 +146,14 @@ export function CartSidebar() {
                           >
                             {product.name}
                           </Link>
+                          {product.vendorType === "supermarche" && product.expiresAt ? (
+                            <SupermarketDlcBlock
+                              expiresAtIso={product.expiresAt}
+                              createdAtIso={product.createdAt}
+                              size="sm"
+                              className="mt-2"
+                            />
+                          ) : null}
                           <p className="mt-1 text-sm font-bold text-boma-blue">
                             {formatXAF(product.pricePromo)}
                           </p>

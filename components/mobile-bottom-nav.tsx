@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  faHouse,
-  faStore,
-  faTags,
-  faUser,
-} from "@fortawesome/free-solid-svg-icons";
+import { faHouse, faStore, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -88,17 +83,6 @@ export function MobileBottomNav() {
         >
           <FontAwesomeIcon icon={faStore} className={navIconClass} aria-hidden />
           <span>Marché</span>
-        </Link>
-        <Link
-          href="/promotions"
-          className={`${navBtnClass} ${
-            pathname.startsWith("/promotions")
-              ? "text-boma-blue"
-              : "text-muted hover:text-foreground"
-          }`}
-        >
-          <FontAwesomeIcon icon={faTags} className={navIconClass} aria-hidden />
-          <span>Promos</span>
         </Link>
         <Link
           href={accountHref}

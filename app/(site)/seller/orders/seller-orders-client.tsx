@@ -11,13 +11,30 @@ import {
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/context/toast-context";
 import type { SellerOrderView } from "@/lib/seller/orders-for-vendor";
-import { labelOrderStatus, labelPaymentMethod } from "@/lib/labels-fr";
+import {
+  labelOrderFulfillment,
+  labelOrderStatus,
+  labelPaymentMethod,
+} from "@/lib/labels-fr";
 import { formatXAF } from "@/lib/mock-products";
 
 const PLACEHOLDER =
   "https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&q=80";
 
 type Props = { orders: SellerOrderView[] };
+
+const ORDER_THUMB_MAX = 3;
+
+function uniqueLinesForThumbs(lines: SellerOrderView["lines"]) {
+  const seen = new Set<string>();
+  const out: SellerOrderView["lines"] = [];
+  for (const l of lines) {
+    if (seen.has(l.product_id)) continue;
+    seen.add(l.product_id);
+    out.push(l);
+  }
+  return out;
+}
 
 type OrderFilter =
   | "all"
@@ -176,10 +193,13 @@ export function SellerOrdersClient({ orders }: Props) {
       ) : (
         <div className="overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[56rem] border-collapse text-left text-sm">
+            <table className="w-full min-w-[62rem] border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-zinc-200 bg-zinc-50/95 text-xs font-semibold uppercase tracking-wide text-muted dark:border-zinc-800 dark:bg-zinc-900/90">
                   <th className="w-10 whitespace-nowrap px-3 py-3 pl-4" scope="col" aria-label="Détail" />
+                  <th className="whitespace-nowrap px-3 py-3" scope="col">
+                    Photos
+                  </th>
                   <th className="whitespace-nowrap px-3 py-3" scope="col">
                     Référence
                   </th>
@@ -207,6 +227,12 @@ export function SellerOrdersClient({ orders }: Props) {
                 const expanded = expandedId === o.id;
                 const lineCount = o.lines.reduce((n, l) => n + l.quantity, 0);
                 const canAct = o.vendor_count_reliable && o.vendor_count <= 1;
+                const thumbLines = uniqueLinesForThumbs(o.lines);
+                const thumbExtra =
+                  thumbLines.length > ORDER_THUMB_MAX
+                    ? thumbLines.length - ORDER_THUMB_MAX
+                    : 0;
+                const thumbShow = thumbLines.slice(0, ORDER_THUMB_MAX);
                 return (
                   <tbody
                     key={o.id}
@@ -227,6 +253,41 @@ export function SellerOrdersClient({ orders }: Props) {
                             className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`}
                           />
                         </button>
+                      </td>
+                      <td className="px-3 py-3 align-middle">
+                        {thumbShow.length ? (
+                          <div
+                            className="flex items-center pl-0.5"
+                            title={thumbLines.map((l) => l.name).join(" · ")}
+                          >
+                            <div className="flex -space-x-2">
+                              {thumbShow.map((line) => (
+                                <div
+                                  key={line.product_id}
+                                  className="relative z-0 h-10 w-10 shrink-0 overflow-hidden rounded-lg border-2 border-white bg-zinc-100 shadow-sm dark:border-zinc-900 dark:bg-zinc-800"
+                                >
+                                  <Image
+                                    src={line.image_url?.trim() || PLACEHOLDER}
+                                    alt=""
+                                    fill
+                                    className="object-cover"
+                                    sizes="40px"
+                                  />
+                                </div>
+                              ))}
+                              {thumbExtra > 0 ? (
+                                <div
+                                  className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-2 border-white bg-zinc-200 text-[11px] font-bold tabular-nums text-zinc-700 shadow-sm dark:border-zinc-900 dark:bg-zinc-700 dark:text-zinc-100"
+                                  aria-label={`${thumbExtra} autre${thumbExtra > 1 ? "s" : ""}`}
+                                >
+                                  +{thumbExtra}
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted">—</span>
+                        )}
                       </td>
                       <td
                         className="max-w-[7rem] truncate px-3 py-3 align-middle font-mono text-xs text-muted"
@@ -270,7 +331,7 @@ export function SellerOrdersClient({ orders }: Props) {
                     </tr>
                     {expanded ? (
                       <tr className="bg-zinc-50/90 dark:bg-zinc-950/50">
-                        <td colSpan={8} className="px-4 pb-5 pt-2 sm:px-6">
+                        <td colSpan={9} className="px-4 pb-5 pt-2 sm:px-6">
                           <div className="flex flex-col gap-4 border-t border-zinc-200/80 pt-4 dark:border-zinc-800">
                             <div className="flex flex-wrap items-start justify-between gap-3 text-xs text-muted">
                               <div>
@@ -288,11 +349,25 @@ export function SellerOrdersClient({ orders }: Props) {
                                     {o.customer.email}
                                   </p>
                                 ) : null}
+                                <p className="mt-2 text-left text-[11px] leading-relaxed text-foreground">
+                                  <span className="font-medium text-foreground">
+                                    Réception :
+                                  </span>{" "}
+                                  {labelOrderFulfillment(o.fulfillment)}
+                                </p>
+                                {o.delivery_address ? (
+                                  <p className="mt-1 max-w-xl whitespace-pre-wrap text-left text-[11px] leading-relaxed text-muted">
+                                    <span className="font-medium text-foreground">
+                                      Adresse :
+                                    </span>{" "}
+                                    {o.delivery_address}
+                                  </p>
+                                ) : null}
                               </div>
                               <div className="text-right">
                                 {!o.vendor_count_reliable ? (
                                   <p className="max-w-sm rounded-lg bg-amber-500/10 px-3 py-2 text-left text-[11px] font-medium text-amber-950 dark:text-amber-100">
-                                    Vérification multi-boutiques indisponible. Total commande{" "}
+                                    Vérification multi-commerces indisponible. Total commande{" "}
                                     <strong>{formatXAF(o.total_amount)}</strong>.
                                   </p>
                                 ) : o.vendor_count > 1 ? (

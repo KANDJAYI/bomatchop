@@ -257,7 +257,7 @@ begin
 end;
 $$;
 
--- Chaque minuit (déclenché par cron + clé service) : plats restaurant visibles → bloqués (hors marché).
+-- Chaque minuit (cron + service_role) : plats restaurant actifs supprimés s’ils n’ont jamais été commandés, sinon bloqués.
 create or replace function public.purge_restaurant_products_midnight()
 returns integer
 language plpgsql
@@ -265,16 +265,28 @@ security definer
 set search_path = public
 as $$
 declare
-  n int;
+  n_del int;
+  n_blk int;
 begin
+  delete from public.products p
+  using public.vendors v
+  where p.vendor_id = v.id
+    and v.business_type = 'restaurant'
+    and p.status = 'active'::public.product_status
+    and not exists (
+      select 1 from public.order_items oi where oi.product_id = p.id
+    );
+  get diagnostics n_del = row_count;
+
   update public.products p
   set status = 'blocked'::public.product_status, updated_at = now()
   from public.vendors v
   where p.vendor_id = v.id
     and v.business_type = 'restaurant'
     and p.status = 'active'::public.product_status;
-  get diagnostics n = row_count;
-  return coalesce(n, 0);
+  get diagnostics n_blk = row_count;
+
+  return coalesce(n_del, 0) + coalesce(n_blk, 0);
 end;
 $$;
 

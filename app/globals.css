@@ -550,3 +550,30 @@ textarea.boma-field-error:focus {
     transform: none;
   }
 }
+
+/* Checkout : marqueurs Leaflet (divIcon) */
+.checkout-map-marker-root {
+  background: none !important;
+  border: none !important;
+}
+
+.checkout-map-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  font-size: 14px;
+  line-height: 1;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+}
+
+.checkout-map-pin--store {
+  background: color-mix(in srgb, var(--boma-forest) 88%, #fff);
+}
+
+.checkout-map-pin--user {
+  background: color-mix(in srgb, var(--boma-blue) 92%, #fff);
+}

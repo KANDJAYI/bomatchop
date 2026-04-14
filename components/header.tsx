@@ -17,9 +17,9 @@ import {
   faIdCard,
   faMagnifyingGlass,
   faPlus,
+  faGear,
   faShieldHalved,
   faStore,
-  faTags,
   faUser,
   faUserPlus,
   faXmark,
@@ -43,6 +43,7 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 function burgerIconForHref(href: string, variant?: string) {
   if (variant === "admin") return faShieldHalved;
   if (href === "/seller/products/new") return faPlus;
+  if (href === "/seller/parametres") return faGear;
   if (href === "/seller/orders") return faClipboardList;
   if (href === "/seller/messages") return faComments;
   if (href === "/seller/account") return faIdCard;
@@ -50,8 +51,6 @@ function burgerIconForHref(href: string, variant?: string) {
   switch (href) {
     case "/marketplace":
       return faStore;
-    case "/promotions":
-      return faTags;
     case "/dashboard":
       return faUser;
     case "/contact":
@@ -223,7 +222,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-foreground/[0.06] bg-background/85 backdrop-blur-xl backdrop-saturate-150">
       <div className="mx-auto flex h-[4.25rem] max-w-6xl items-center justify-between gap-2 px-4 sm:gap-4 sm:px-6">
-        <div className="flex min-w-0 flex-1 items-center gap-2 md:flex-none md:gap-4">
+        <div className="flex shrink-0 items-center gap-2 md:gap-4">
           <Logo />
         </div>
         <nav

@@ -5,11 +5,16 @@ import { createServiceRoleClient } from "@/lib/supabase/service-role";
 export const dynamic = "force-dynamic";
 
 /**
- * À appeler chaque minuit (heure du marché), ex. cron Vercel.
- * Sécurité : header Authorization: Bearer <CRON_SECRET>
+ * Purge des plats restaurant (RPC `purge_restaurant_products_midnight`).
  *
- * Fuseau par défaut Libreville (UTC+1) : minuit local = 23:00 UTC → schedule `0 23 * * *`.
- * Ajustez si BOMA_MARKET_TIMEZONE change.
+ * Ce endpoint ne tourne pas tout seul à minuit sur votre PC : il doit être appelé par
+ * un planificateur (Vercel Cron en prod, ou pg_cron sur Supabase — voir migration
+ * `20260416120000_pg_cron_restaurant_midnight_purge.sql`).
+ *
+ * En local : `npm run purge:restaurant` (avec service_role dans .env.local).
+ *
+ * Sécurité : header `Authorization: Bearer <CRON_SECRET>`.
+ * Minuit UTC+1 (ex. Libreville) ≈ 23:00 UTC → Vercel `vercel.json` utilise `0 23 * * *`.
  */
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET?.trim();
@@ -62,8 +67,9 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     ok: true,
+    affectedCount: blockedCount,
     blockedCount,
     message:
-      "Plats restaurant actifs passés en statut bloqué (hors marché). Les commerçants peuvent republier.",
+      "Purge BOMA minuit : plats restaurant retirés du marché (suppression s’ils n’ont jamais été commandés, sinon statut bloqué pour conserver l’historique des commandes).",
   });
 }

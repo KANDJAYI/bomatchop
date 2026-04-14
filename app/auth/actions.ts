@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   applyDiscountPercent,
   evaluateProductPricing,
+  getRestaurantListingConsumeBy,
 } from "@/lib/business-rules";
 import { signVendorDocumentPair } from "@/lib/admin/vendor-docs";
 import { isUndefinedColumnError } from "@/lib/supabase/pg-errors";
@@ -83,7 +84,11 @@ export async function registerVendorAction(
   const first_name = String(formData.get("first_name") ?? "").trim();
   const last_name = String(formData.get("last_name") ?? "").trim();
   const business_name = String(formData.get("business_name") ?? "").trim();
-  const business_type = String(formData.get("business_type") ?? "boutique").trim();
+  let business_type = String(formData.get("business_type") ?? "supermarket").trim();
+  if (business_type === "boutique") business_type = "supermarket";
+  if (business_type !== "supermarket" && business_type !== "restaurant") {
+    business_type = "supermarket";
+  }
   const location = String(formData.get("location") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
@@ -165,12 +170,20 @@ export async function applyVendorApplication(input: {
     };
   }
 
+  const rawBt = input.businessType as unknown as string;
+  const businessType: BusinessType =
+    rawBt === "boutique"
+      ? "supermarket"
+      : rawBt === "restaurant"
+        ? "restaurant"
+        : "supermarket";
+
   const rowFull = {
     user_id: user.id,
     first_name: input.firstName.trim(),
     last_name: input.lastName.trim(),
     business_name: input.businessName.trim(),
-    business_type: input.businessType,
+    business_type: businessType,
     location: input.location.trim(),
     phone: input.phone.trim(),
     id_document_url: input.idDocumentPath,
@@ -254,7 +267,6 @@ export async function createProductAction(formData: FormData) {
   const stock = Number(formData.get("stock") ?? 0);
   const expiresAtRaw = String(formData.get("expires_at") ?? "").trim();
   const preparedAtRaw = String(formData.get("prepared_at") ?? "").trim();
-  const consumeByRaw = String(formData.get("consume_by") ?? "").trim();
 
   const businessType = vendor.business_type as BusinessType;
 
@@ -263,15 +275,17 @@ export async function createProductAction(formData: FormData) {
     preparedAtRaw && !Number.isNaN(new Date(preparedAtRaw).getTime())
       ? new Date(preparedAtRaw)
       : null;
+  const nowCreate = new Date();
   const consumeBy =
-    consumeByRaw && !Number.isNaN(new Date(consumeByRaw).getTime())
-      ? new Date(consumeByRaw)
+    businessType === "restaurant"
+      ? getRestaurantListingConsumeBy(nowCreate)
       : null;
 
   const evalResult = evaluateProductPricing(businessType, {
     expiresAt,
     preparedAt,
     consumeBy,
+    now: nowCreate,
   });
 
   if (!evalResult.ok || evalResult.discountPercent == null) {
@@ -356,16 +370,69 @@ export async function deleteProductAction(productId: string) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non connecté." };
 
-  const { data: row } = await supabase
+  const { data: product, error: loadErr } = await supabase
     .from("products")
-    .select("image_url")
+    .select("id, vendor_id, image_url")
     .eq("id", productId)
     .maybeSingle();
 
-  const { error } = await supabase.from("products").delete().eq("id", productId);
-  if (error) return { error: error.message };
+  if (loadErr) return { error: loadErr.message };
+  if (!product) {
+    return { error: "Produit introuvable ou vous n’y avez pas accès." };
+  }
 
-  await removeProductImageIfOwned(supabase, user.id, row?.image_url);
+  const { data: myVendors, error: vErr } = await supabase
+    .from("vendors")
+    .select("id")
+    .eq("user_id", user.id);
+
+  if (vErr) return { error: vErr.message };
+  const mine = new Set((myVendors ?? []).map((r) => r.id));
+  if (!mine.has(product.vendor_id)) {
+    return { error: "Vous ne pouvez supprimer que les offres de votre commerce." };
+  }
+
+  const { count, error: cErr } = await supabase
+    .from("order_items")
+    .select("id", { count: "exact", head: true })
+    .eq("product_id", productId);
+
+  if (cErr) return { error: cErr.message };
+  if (count != null && count > 0) {
+    return {
+      error:
+        "Impossible de supprimer : ce produit figure déjà dans une ou plusieurs commandes (historique à conserver). Il peut rester « bloqué » hors marché ; contactez le support BOMA si vous devez le retirer définitivement.",
+    };
+  }
+
+  const { data: deleted, error } = await supabase
+    .from("products")
+    .delete()
+    .eq("id", productId)
+    .select("id");
+
+  if (error) {
+    const msg = error.message ?? "";
+    if (
+      msg.toLowerCase().includes("foreign key") ||
+      msg.includes("violates foreign key")
+    ) {
+      return {
+        error:
+          "Suppression impossible : ce produit est encore référencé (commande ou donnée liée).",
+      };
+    }
+    return { error: msg };
+  }
+
+  if (!deleted?.length) {
+    return {
+      error:
+        "La suppression n’a pas abouti (droits base de données). Vérifiez que la migration RLS produits est à jour, ou contactez le support.",
+    };
+  }
+
+  await removeProductImageIfOwned(supabase, user.id, product.image_url);
 
   revalidatePath("/marketplace");
   revalidatePath("/seller");
@@ -522,10 +589,15 @@ export async function vendorUpdateOrderStatusAction(
   return { ok: true as const };
 }
 
+export type CheckoutFulfillment = "home_delivery" | "pickup";
+
 export async function finalizeCheckoutAction(input: {
   fullName: string;
   phone: string;
-  paymentMethod: "cash_on_delivery" | "airtel_money" | "moov_money";
+  /** Livraison à domicile ou retrait au commerce. */
+  fulfillment: CheckoutFulfillment;
+  /** Obligatoire si `fulfillment` est `home_delivery` (sinon ignoré). */
+  deliveryAddress: string;
   items: { product_id: string; quantity: number }[];
 }) {
   const supabase = await createClient();
@@ -538,6 +610,16 @@ export async function finalizeCheckoutAction(input: {
 
   if (!input.items?.length) {
     return { error: "Panier vide." };
+  }
+
+  const fulfillment =
+    input.fulfillment === "pickup" ? "pickup" : "home_delivery";
+  const deliveryAddress = input.deliveryAddress.trim();
+  if (fulfillment === "home_delivery" && deliveryAddress.length < 12) {
+    return {
+      error:
+        "Indiquez une adresse de livraison complète (rue, quartier, repères, accès…).",
+    };
   }
 
   const { data: blocked, error: blockErr } = await supabase.rpc(
@@ -570,8 +652,11 @@ export async function finalizeCheckoutAction(input: {
   const { data: orderIdsRaw, error } = await supabase.rpc(
     "create_orders_split_by_vendor",
     {
-      p_payment: input.paymentMethod,
+      p_payment: "cash_on_delivery" as const,
       p_items: payload,
+      p_delivery_address:
+        fulfillment === "pickup" ? null : deliveryAddress,
+      p_fulfillment: fulfillment,
     },
   );
 
@@ -583,7 +668,17 @@ export async function finalizeCheckoutAction(input: {
     ) {
       return {
         error:
-          "Migration Supabase requise : exécutez supabase/migrations/20260413130000_orders_split_by_vendor.sql (commandes séparées par vendeur).",
+          "Migration Supabase requise : commandes multi-vendeur + livraison + retrait (20260413130000, 20260415140000, 20260415150000_orders_fulfillment_pickup.sql).",
+      };
+    }
+    if (
+      (msg.toLowerCase().includes("delivery_address") ||
+        msg.toLowerCase().includes("fulfillment")) &&
+      (msg.includes("does not exist") || msg.includes("n'existe pas"))
+    ) {
+      return {
+        error:
+          "Schéma commandes incomplet : appliquez supabase/migrations/20260415140000_orders_delivery_address.sql puis 20260415150000_orders_fulfillment_pickup.sql",
       };
     }
     return { error: msg };
@@ -692,7 +787,6 @@ export async function updateProductAction(formData: FormData) {
   const stock = Number(formData.get("stock") ?? 0);
   const expiresAtRaw = String(formData.get("expires_at") ?? "").trim();
   const preparedAtRaw = String(formData.get("prepared_at") ?? "").trim();
-  const consumeByRaw = String(formData.get("consume_by") ?? "").trim();
 
   const businessType = vendor.business_type as BusinessType;
 
@@ -701,16 +795,25 @@ export async function updateProductAction(formData: FormData) {
     preparedAtRaw && !Number.isNaN(new Date(preparedAtRaw).getTime())
       ? new Date(preparedAtRaw)
       : null;
+  const nowUpdate = new Date();
   const consumeBy =
-    consumeByRaw && !Number.isNaN(new Date(consumeByRaw).getTime())
-      ? new Date(consumeByRaw)
+    businessType === "restaurant"
+      ? getRestaurantListingConsumeBy(nowUpdate)
       : null;
 
-  const evalResult = evaluateProductPricing(businessType, {
-    expiresAt,
-    preparedAt,
-    consumeBy,
-  });
+  const evalResult = evaluateProductPricing(
+    businessType,
+    {
+      expiresAt,
+      preparedAt,
+      consumeBy,
+      now: nowUpdate,
+    },
+    {
+      skipRestaurantPublishWindow:
+        businessType === "restaurant" && status === "draft",
+    },
+  );
 
   if (!evalResult.ok || evalResult.discountPercent == null) {
     return { error: evalResult.refuseReason ?? "Produit refusé par les règles." };
@@ -776,6 +879,113 @@ export async function updateSellerProfileAction(formData: FormData) {
 
   revalidatePath("/seller/account");
   revalidatePath("/dashboard");
+  return { ok: true as const };
+}
+
+export async function updateVendorShopCoordinatesAction(formData: FormData) {
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase non configuré." };
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non connecté." };
+
+  const clear = String(formData.get("clear") ?? "").trim() === "1";
+
+  let pLat: number | null;
+  let pLon: number | null;
+  if (clear) {
+    pLat = null;
+    pLon = null;
+  } else {
+    const lat = Number(String(formData.get("latitude") ?? "").replace(",", "."));
+    const lon = Number(String(formData.get("longitude") ?? "").replace(",", "."));
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      return { error: "Latitude et longitude invalides." };
+    }
+    pLat = lat;
+    pLon = lon;
+  }
+
+  const { data, error } = await supabase.rpc("set_vendor_shop_coordinates", {
+    p_lat: pLat,
+    p_lon: pLon,
+  });
+
+  if (error) {
+    const msg = error.message ?? "";
+    if (
+      msg.includes("set_vendor_shop_coordinates") &&
+      (msg.includes("does not exist") || msg.includes("n'existe pas"))
+    ) {
+      return {
+        error:
+          "Migration manquante : exécutez supabase/migrations/20260415100000_vendors_shop_coordinates.sql",
+      };
+    }
+    return { error: msg };
+  }
+
+  const payload = data as { ok?: boolean; error?: string } | null;
+  if (payload && payload.ok === false && typeof payload.error === "string") {
+    return { error: payload.error };
+  }
+
+  revalidatePath("/seller/account");
+  revalidatePath("/marketplace");
+  revalidatePath("/checkout");
+  revalidatePath("/", "layout");
+  return { ok: true as const };
+}
+
+export async function updateVendorWhatsAppAction(formData: FormData) {
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase non configuré." };
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Non connecté." };
+
+  const raw = String(formData.get("whatsapp_phone") ?? "").trim();
+  if (raw.length > 0) {
+    const { toWhatsAppDigits } = await import("@/lib/whatsapp");
+    if (!toWhatsAppDigits(raw)) {
+      return {
+        error:
+          "Numéro WhatsApp invalide : indicatif pays inclus, 8 à 15 chiffres (espaces et + acceptés).",
+      };
+    }
+  }
+
+  const { data, error } = await supabase.rpc("set_vendor_whatsapp_phone", {
+    p_phone: raw.length > 0 ? raw : null,
+  });
+
+  if (error) {
+    const msg = error.message ?? "";
+    if (
+      msg.includes("set_vendor_whatsapp_phone") &&
+      (msg.includes("does not exist") || msg.includes("n'existe pas"))
+    ) {
+      return {
+        error:
+          "Migration manquante : exécutez supabase/migrations/20260416200000_vendors_whatsapp_phone.sql",
+      };
+    }
+    return { error: msg };
+  }
+
+  const payload = data as { ok?: boolean; error?: string } | null;
+  if (payload && payload.ok === false && typeof payload.error === "string") {
+    return { error: payload.error };
+  }
+
+  revalidatePath("/seller/parametres");
+  revalidatePath("/marketplace");
+  revalidatePath("/checkout");
+  revalidatePath("/", "layout");
   return { ok: true as const };
 }
 
@@ -856,4 +1066,49 @@ export async function adminSendVendorMessageAction(formData: FormData) {
   revalidatePath("/admin/vendors");
   revalidatePath("/seller/messages");
   return { ok: true as const };
+}
+
+export async function adminTriggerRestaurantMidnightPurgeAction(): Promise<
+  | { ok: true; count: number }
+  | { error: string }
+> {
+  const supabase = await createClient();
+  if (!supabase) {
+    return { error: "Supabase n’est pas configuré." };
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "Vous devez être connecté." };
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    return { error: profileError.message };
+  }
+  if (profile?.role !== "admin") {
+    return { error: "Accès réservé aux administrateurs." };
+  }
+
+  const { data, error } = await supabase.rpc(
+    "admin_trigger_restaurant_midnight_purge",
+  );
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  const count = typeof data === "number" ? data : Number(data ?? 0);
+  revalidatePath("/");
+  revalidatePath("/marketplace");
+  revalidatePath("/seller");
+  revalidatePath("/admin/schedule");
+  return { ok: true as const, count: Number.isFinite(count) ? count : 0 };
 }

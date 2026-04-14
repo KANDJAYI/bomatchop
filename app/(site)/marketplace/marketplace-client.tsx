@@ -71,7 +71,6 @@ export function MarketplaceClient({
             <option value="all">Tous</option>
             <option value="restaurant">Restaurant</option>
             <option value="supermarche">Supermarché</option>
-            <option value="boutique">Boutique</option>
           </select>
         </label>
         <label className="flex min-w-[200px] flex-1 flex-col gap-2 text-sm font-medium text-foreground/90">
@@ -94,7 +93,7 @@ export function MarketplaceClient({
           recherche ou le plafond de prix.
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
           {filtered.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
