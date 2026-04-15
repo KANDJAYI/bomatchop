@@ -10,14 +10,29 @@ import {
 
 export type ToastVariant = "success" | "error" | "info";
 
+export type ToastAction = {
+  label: string;
+  onClick: () => void | Promise<void>;
+};
+
+export type ToastOptions = {
+  durationMs?: number;
+  action?: ToastAction;
+};
+
 type Toast = {
   id: number;
   message: string;
   variant: ToastVariant;
+  action?: ToastAction;
 };
 
 type ToastContextValue = {
-  showToast: (message: string, variant?: ToastVariant) => void;
+  showToast: (
+    message: string,
+    variant?: ToastVariant,
+    options?: ToastOptions,
+  ) => void;
 };
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -25,16 +40,35 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const idRef = useRef(0);
+  /** DOM timers are numeric handles; avoid NodeJS.Timeout from merged typings. */
+  const timersRef = useRef<Map<number, number>>(new Map());
+
+  const removeToast = useCallback((id: number) => {
+    const t = timersRef.current.get(id);
+    if (t !== undefined) {
+      window.clearTimeout(t);
+      timersRef.current.delete(id);
+    }
+    setToasts((prev) => prev.filter((x) => x.id !== id));
+  }, []);
 
   const showToast = useCallback(
-    (message: string, variant: ToastVariant = "info") => {
+    (
+      message: string,
+      variant: ToastVariant = "info",
+      options?: ToastOptions,
+    ) => {
       const id = ++idRef.current;
-      setToasts((prev) => [...prev, { id, message, variant }]);
-      window.setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
-      }, 3200);
+      const durationMs =
+        options?.durationMs ?? (options?.action ? 20_000 : 3200);
+      setToasts((prev) => [
+        ...prev,
+        { id, message, variant, action: options?.action },
+      ]);
+      const timer = window.setTimeout(() => removeToast(id), durationMs);
+      timersRef.current.set(id, timer);
     },
-    [],
+    [removeToast],
   );
 
   return (
@@ -55,7 +89,30 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   : "border-boma-blue/30 bg-boma-ink/90 text-white dark:bg-card dark:text-foreground"
             }`}
           >
-            {t.message}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              <p className="min-w-0 flex-1 leading-snug">{t.message}</p>
+              {t.action ? (
+                <button
+                  type="button"
+                  className={`shrink-0 rounded-xl px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                    t.variant === "success"
+                      ? "bg-emerald-400/20 text-emerald-50 hover:bg-emerald-400/30 focus-visible:outline-emerald-200"
+                      : t.variant === "error"
+                        ? "bg-red-400/20 text-red-50 hover:bg-red-400/30 focus-visible:outline-red-200"
+                        : "bg-white/15 text-white hover:bg-white/25 focus-visible:outline-white/70 dark:bg-foreground/10 dark:text-foreground dark:hover:bg-foreground/15 dark:focus-visible:outline-boma-blue/50"
+                  }`}
+                  onClick={async () => {
+                    try {
+                      await t.action?.onClick();
+                    } finally {
+                      removeToast(t.id);
+                    }
+                  }}
+                >
+                  {t.action.label}
+                </button>
+              ) : null}
+            </div>
           </div>
         ))}
       </div>

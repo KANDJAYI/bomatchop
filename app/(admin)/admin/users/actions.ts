@@ -26,7 +26,7 @@ async function requireAdmin() {
   if (profile?.role !== "admin") {
     return { error: "Accès refusé." as const, supabase, userId: null };
   }
-  return { error: null as const, supabase, userId: user.id };
+  return { error: null, supabase, userId: user.id };
 }
 
 export async function adminUpdateUserFromForm(formData: FormData) {
