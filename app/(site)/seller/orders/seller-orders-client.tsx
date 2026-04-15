@@ -139,7 +139,7 @@ export function SellerOrdersClient({ orders }: Props) {
           label="À traiter"
           value={stats.needsAction}
           hint="En attente / payée"
-          accent="border-amber-500/25 bg-amber-500/[0.06] text-amber-950 dark:text-amber-100"
+          accent="border-amber-300 bg-amber-50 dark:border-amber-500/35 dark:bg-amber-950/35"
           active={filter === "needs_action"}
           onSelect={() => setFilter("needs_action")}
         />
@@ -147,7 +147,7 @@ export function SellerOrdersClient({ orders }: Props) {
           label="En préparation"
           value={stats.preparing}
           hint="Après acceptation"
-          accent="border-boma-blue/25 bg-boma-blue/[0.06] text-foreground"
+          accent="border-sky-300 bg-sky-50 dark:border-boma-blue/40 dark:bg-boma-blue/20"
           active={filter === "preparing"}
           onSelect={() => setFilter("preparing")}
         />
@@ -155,7 +155,7 @@ export function SellerOrdersClient({ orders }: Props) {
           label="Prêtes"
           value={stats.ready}
           hint="Retrait possible"
-          accent="border-emerald-500/25 bg-emerald-500/[0.07] text-emerald-950 dark:text-emerald-100"
+          accent="border-emerald-300 bg-emerald-50 dark:border-emerald-500/35 dark:bg-emerald-950/35"
           active={filter === "ready"}
           onSelect={() => setFilter("ready")}
         />
@@ -163,7 +163,7 @@ export function SellerOrdersClient({ orders }: Props) {
           label="Clôturées"
           value={stats.closed}
           hint="Terminées / annulées"
-          accent="border-zinc-300 bg-zinc-100/80 dark:border-zinc-700 dark:bg-zinc-800/50"
+          accent="border-zinc-300 bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-800/70"
           active={filter === "closed"}
           onSelect={() => setFilter("closed")}
         />
@@ -178,7 +178,7 @@ export function SellerOrdersClient({ orders }: Props) {
             className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
               filter === f.id
                 ? "bg-boma-blue text-white shadow-sm shadow-boma-blue/25"
-                : "border border-zinc-200 bg-white text-muted hover:border-zinc-300 hover:text-foreground dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-zinc-600"
+                : "border border-zinc-300 bg-white text-zinc-800 hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-800"
             }`}
           >
             {f.label}
@@ -191,11 +191,11 @@ export function SellerOrdersClient({ orders }: Props) {
           Aucune commande dans ce filtre.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50">
+        <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[62rem] border-collapse text-left text-sm">
+            <table className="w-full min-w-[62rem] border-collapse text-left text-sm text-zinc-900 dark:text-zinc-100">
               <thead>
-                <tr className="border-b border-zinc-200 bg-zinc-50/95 text-xs font-semibold uppercase tracking-wide text-muted dark:border-zinc-800 dark:bg-zinc-900/90">
+                <tr className="border-b border-zinc-200 bg-zinc-100 text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
                   <th className="w-10 whitespace-nowrap px-3 py-3 pl-4" scope="col" aria-label="Détail" />
                   <th className="whitespace-nowrap px-3 py-3" scope="col">
                     Photos
@@ -236,14 +236,14 @@ export function SellerOrdersClient({ orders }: Props) {
                 return (
                   <tbody
                     key={o.id}
-                    className="border-b border-zinc-100 last:border-b-0 dark:border-zinc-800/80"
+                    className="border-b border-zinc-200 last:border-b-0 dark:border-zinc-800/80"
                   >
-                    <tr className="bg-white transition-colors hover:bg-zinc-50/90 dark:bg-transparent dark:hover:bg-zinc-900/40">
+                    <tr className="bg-white transition-colors hover:bg-zinc-50 dark:bg-zinc-950/40 dark:hover:bg-zinc-900/70">
                       <td className="whitespace-nowrap px-3 py-3 pl-4 align-middle">
                         <button
                           type="button"
                           onClick={() => toggleExpand(o.id)}
-                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 text-muted transition-colors hover:bg-white hover:text-foreground dark:border-zinc-700 dark:hover:bg-zinc-800"
+                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
                           aria-expanded={expanded}
                           aria-label={
                             expanded ? "Masquer le détail" : "Afficher le détail"
@@ -286,16 +286,16 @@ export function SellerOrdersClient({ orders }: Props) {
                             </div>
                           </div>
                         ) : (
-                          <span className="text-xs text-muted">—</span>
+                          <span className="text-xs text-zinc-500 dark:text-zinc-400">—</span>
                         )}
                       </td>
                       <td
-                        className="max-w-[7rem] truncate px-3 py-3 align-middle font-mono text-xs text-muted"
+                        className="max-w-[7rem] truncate px-3 py-3 align-middle font-mono text-xs text-zinc-700 dark:text-zinc-300"
                         title={o.id}
                       >
                         {String(o.id).slice(0, 8)}…
                       </td>
-                      <td className="whitespace-nowrap px-3 py-3 align-middle text-muted">
+                      <td className="whitespace-nowrap px-3 py-3 align-middle text-zinc-700 dark:text-zinc-300">
                         {new Date(o.created_at).toLocaleString("fr-FR", {
                           dateStyle: "short",
                           timeStyle: "short",
@@ -309,7 +309,7 @@ export function SellerOrdersClient({ orders }: Props) {
                           {o.customer.full_name ?? "Client"}
                         </span>
                       </td>
-                      <td className="max-w-[10rem] px-3 py-3 align-middle text-muted">
+                      <td className="max-w-[10rem] px-3 py-3 align-middle text-zinc-700 dark:text-zinc-300">
                         <span
                           className="block truncate text-xs"
                           title={o.customer.phone ?? undefined}
@@ -318,22 +318,22 @@ export function SellerOrdersClient({ orders }: Props) {
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-3 py-3 align-middle">
-                        <span className="inline-flex shrink-0 rounded-full bg-boma-blue/12 px-2.5 py-0.5 text-[11px] font-semibold text-boma-blue">
+                        <span className="inline-flex shrink-0 rounded-full border border-boma-blue/25 bg-boma-blue/15 px-2.5 py-0.5 text-[11px] font-semibold text-boma-blue dark:border-boma-blue/30 dark:bg-boma-blue/25 dark:text-sky-200">
                           {labelOrderStatus(o.status)}
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-3 py-3 align-middle font-semibold tabular-nums text-foreground">
                         {formatXAF(o.vendor_subtotal)}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-3 pr-4 text-right align-middle tabular-nums text-muted">
+                      <td className="whitespace-nowrap px-3 py-3 pr-4 text-right align-middle tabular-nums text-zinc-700 dark:text-zinc-300">
                         {lineCount}
                       </td>
                     </tr>
                     {expanded ? (
-                      <tr className="bg-zinc-50/90 dark:bg-zinc-950/50">
+                      <tr className="bg-zinc-100/95 dark:bg-zinc-950/60">
                         <td colSpan={9} className="px-4 pb-5 pt-2 sm:px-6">
                           <div className="flex flex-col gap-4 border-t border-zinc-200/80 pt-4 dark:border-zinc-800">
-                            <div className="flex flex-wrap items-start justify-between gap-3 text-xs text-muted">
+                            <div className="flex flex-wrap items-start justify-between gap-3 text-xs text-zinc-700 dark:text-zinc-300">
                               <div>
                                 <p>
                                   <span className="font-medium text-foreground">
@@ -356,7 +356,7 @@ export function SellerOrdersClient({ orders }: Props) {
                                   {labelOrderFulfillment(o.fulfillment)}
                                 </p>
                                 {o.delivery_address ? (
-                                  <p className="mt-1 max-w-xl whitespace-pre-wrap text-left text-[11px] leading-relaxed text-muted">
+                                  <p className="mt-1 max-w-xl whitespace-pre-wrap text-left text-[11px] leading-relaxed text-zinc-600 dark:text-zinc-400">
                                     <span className="font-medium text-foreground">
                                       Adresse :
                                     </span>{" "}
@@ -373,7 +373,7 @@ export function SellerOrdersClient({ orders }: Props) {
                                 ) : o.vendor_count > 1 ? (
                                   <p className="max-w-sm rounded-lg bg-amber-500/10 px-3 py-2 text-left text-[11px] font-medium text-amber-950 dark:text-amber-100">
                                     {o.vendor_count} commerces sur cette commande. Votre part :{" "}
-                                    <strong>{formatXAF(o.vendor_subtotal)}</strong> — BOMA pour le
+                                    <strong>{formatXAF(o.vendor_subtotal)}</strong> — BOMA TCHOP pour le
                                     reste.
                                   </p>
                                 ) : (
@@ -384,7 +384,7 @@ export function SellerOrdersClient({ orders }: Props) {
                               </div>
                             </div>
 
-                            <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
                               Lignes concernant vos offres
                             </p>
                             <ul className="divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900/60">
@@ -404,7 +404,7 @@ export function SellerOrdersClient({ orders }: Props) {
                                   </div>
                                   <div className="min-w-0 flex-1">
                                     <p className="font-medium text-foreground">{line.name}</p>
-                                    <p className="text-xs text-muted">
+                                    <p className="text-xs text-zinc-600 dark:text-zinc-400">
                                       × {line.quantity} · {formatXAF(line.unit_price)} l’unité
                                     </p>
                                   </div>
@@ -461,14 +461,18 @@ function StatCard({
       type="button"
       onClick={onSelect}
       className={`rounded-2xl border px-4 py-3 text-left shadow-sm transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-boma-blue ${accent} ${
-        active ? "ring-2 ring-boma-blue/40 ring-offset-2 ring-offset-zinc-50 dark:ring-offset-[#070a0d]" : ""
+        active ? "ring-2 ring-boma-blue/50 ring-offset-2 ring-offset-white dark:ring-boma-blue/40 dark:ring-offset-zinc-950" : ""
       }`}
     >
-      <p className="text-[11px] font-semibold uppercase tracking-wide opacity-80">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
         {label}
       </p>
-      <p className="mt-1 text-2xl font-bold tabular-nums tracking-tight">{value}</p>
-      <p className="mt-0.5 text-[11px] opacity-75">{hint}</p>
+      <p className="mt-1 text-2xl font-bold tabular-nums tracking-tight text-zinc-950 dark:text-white">
+        {value}
+      </p>
+      <p className="mt-0.5 text-[11px] leading-snug text-zinc-600 dark:text-zinc-400">
+        {hint}
+      </p>
     </button>
   );
 }
@@ -564,7 +568,7 @@ function OrderActionBar({
         "cancelled",
         "abandoned",
       ].includes(status) && (
-        <p className="text-xs text-muted">Statut « {status} » — contactez BOMA si besoin.</p>
+        <p className="text-xs text-muted">Statut « {status} » — contactez BOMA TCHOP si besoin.</p>
       )}
     </div>
   );

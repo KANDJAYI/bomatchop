@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -14,15 +14,29 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   title: {
-    default: "BOMA — Anti-gaspillage alimentaire",
-    template: "%s | BOMA",
+    default: "BOMA TCHOP — Anti-gaspillage alimentaire",
+    template: "%s | BOMA TCHOP",
   },
   description:
-    "Achetez des produits et plats à prix réduits au Gabon (Libreville, Owendo, Akanda…). BOMA connecte commerces, restaurants et consommateurs pour réduire le gaspillage alimentaire.",
-  applicationName: "BOMA",
+    "Achetez des produits et plats à prix réduits au Gabon (Libreville, Owendo, Akanda…). BOMA TCHOP connecte commerces, restaurants et consommateurs pour réduire le gaspillage alimentaire.",
+  applicationName: "BOMA TCHOP",
   metadataBase: getSiteOrigin(),
+  appleWebApp: {
+    capable: true,
+    title: "BOMA TCHOP",
+    statusBarStyle: "default",
+  },
   keywords: [
     "anti-gaspillage",
     "anti gaspillage",
@@ -48,23 +62,23 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "fr_GA",
-    siteName: "BOMA",
-    title: "BOMA — Anti-gaspillage alimentaire au Gabon",
+    siteName: "BOMA TCHOP",
+    title: "BOMA TCHOP — Anti-gaspillage alimentaire au Gabon",
     description:
-      "Des offres anti-gaspillage au Gabon : plats, courses et invendus à prix réduit. Trouvez des offres près de chez vous sur BOMA.",
+      "Des offres anti-gaspillage au Gabon : plats, courses et invendus à prix réduit. Trouvez des offres près de chez vous sur BOMA TCHOP.",
     url: "/",
     images: [
       {
         url: "/logobomatchop-removebg-preview.png",
         width: 512,
         height: 512,
-        alt: "BOMA",
+        alt: "BOMA TCHOP",
       },
     ],
   },
   twitter: {
     card: "summary",
-    title: "BOMA — Anti-gaspillage alimentaire au Gabon",
+    title: "BOMA TCHOP — Anti-gaspillage alimentaire au Gabon",
     description:
       "Des offres anti-gaspillage au Gabon : plats, courses et invendus à prix réduit.",
     images: ["/logobomatchop-removebg-preview.png"],
@@ -91,7 +105,7 @@ export default function RootLayout({
   const orgLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "BOMA",
+    name: "BOMA TCHOP",
     url: origin,
     logo: `${origin}/logobomatchop-removebg-preview.png`,
     sameAs: [
@@ -103,7 +117,7 @@ export default function RootLayout({
   const websiteLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "BOMA",
+    name: "BOMA TCHOP",
     url: origin,
     inLanguage: "fr-GA",
     potentialAction: {

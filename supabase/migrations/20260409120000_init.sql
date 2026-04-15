@@ -1,4 +1,4 @@
--- BOMA — schéma initial Supabase (RLS, auth, stockage)
+-- BOMA TCHOP — schéma initial Supabase (RLS, auth, stockage)
 -- Exécuter via Supabase SQL Editor ou `supabase db push`
 
 create extension if not exists "pgcrypto";

@@ -5,7 +5,7 @@ import { ContactForm } from "@/components/contact/contact-form";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Contactez BOMA (Gabon) : support, partenariats, vendeurs. Réponse rapide via formulaire.",
+    "Contactez BOMA TCHOP (Gabon) : support, partenariats, vendeurs. Réponse rapide via formulaire.",
 };
 
 const contactEmail =
@@ -17,7 +17,7 @@ export default function ContactPage() {
       <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
         <div className="lg:col-span-5">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Contactez BOMA
+            Contactez BOMA TCHOP
           </h1>
           <p className="mt-4 text-[0.9375rem] leading-relaxed text-muted">
             Une question sur une offre, votre compte, ou un partenariat au Gabon ?

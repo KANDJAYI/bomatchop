@@ -36,7 +36,7 @@ export default async function VendorApplicationPage() {
       </h1>
       <p className="mt-2 text-sm text-muted">
         Après envoi, votre dossier est <strong>en attente</strong> jusqu’à validation par
-        l’équipe BOMA.
+        l’équipe BOMA TCHOP.
       </p>
       {existing?.status === "pending" && (
         <p className="mt-6 rounded-2xl border border-boma-blue/30 bg-boma-blue/10 p-4 text-sm">

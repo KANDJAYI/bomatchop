@@ -25,7 +25,7 @@ export async function GET(request: Request) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim() || "https://localhost";
   const ua =
     process.env.NOMINATIM_USER_AGENT?.trim() ||
-    `BOMA/1.0 (+${appUrl}; checkout geocoder)`;
+    `BOMA-TCHOP/1.0 (+${appUrl}; checkout geocoder)`;
 
   const res = await fetch(nominatim.toString(), {
     headers: {

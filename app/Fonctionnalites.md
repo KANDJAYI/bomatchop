@@ -6,13 +6,13 @@
 
 Tu es un **développeur senior full-stack + designer UI/UX expert**.
 
-Tu dois construire une application moderne appelée **BOMA**, avec une logique métier avancée, une UX fluide et un design premium digne d’une startup financée.
+Tu dois construire une application moderne appelée **BOMA TCHOP**, avec une logique métier avancée, une UX fluide et un design premium digne d’une startup financée.
 
 ---
 
 # 🌍 CONTEXTE PRODUIT
 
-BOMA est une plateforme qui permet :
+BOMA TCHOP est une plateforme qui permet :
 
 * aux **supermarchés et restaurants** de vendre leurs produits à prix réduits
 * aux **clients** d’acheter des produits alimentaires à moindre coût

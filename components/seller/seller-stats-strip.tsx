@@ -29,7 +29,7 @@ export function SellerStatsStrip({
             {businessName}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
-            {businessTypeLabel} — offres visibles sur le marché BOMA dès publication.
+            {businessTypeLabel} — offres visibles sur le marché BOMA TCHOP dès publication.
           </p>
         </div>
         <div className="grid w-full grid-cols-1 gap-3 sm:max-w-2xl sm:grid-cols-3 sm:gap-4 lg:max-w-xl lg:shrink-0">

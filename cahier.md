@@ -2,13 +2,13 @@
 
 Tu es un **designer UI/UX senior + développeur frontend expert**.
 
-Ta mission est de concevoir une application appelée **BOMA**, avec une expérience utilisateur **ultra moderne, fluide et premium**, digne d’une startup internationale.
+Ta mission est de concevoir une application appelée **BOMA TCHOP**, avec une expérience utilisateur **ultra moderne, fluide et premium**, digne d’une startup internationale.
 
 ---
 
 ## 🌍 VISION PRODUIT
 
-BOMA est une plateforme qui permet :
+BOMA TCHOP est une plateforme qui permet :
 
 * aux commerces alimentaires de vendre leurs produits à prix réduit
 * aux restaurants de proposer des plats abordables
@@ -67,7 +67,7 @@ Créer un logo intégré :
 
 * Masque traditionnel gabonais (élément principal)
 * Carte du Gabon en arrière-plan
-* Texte “BOMA”
+* Texte “BOMA TCHOP”
 * Effet glow lumineux sur le texte
 
 ---

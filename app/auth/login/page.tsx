@@ -19,7 +19,7 @@ export default async function LoginPage({ searchParams }: Props) {
       </Link>
       <h1 className="text-2xl font-semibold tracking-tight">Connexion</h1>
       <p className="mt-2 text-sm text-muted">
-        Espace client BOMA — e-mail et mot de passe.
+        Espace client BOMA TCHOP — e-mail et mot de passe.
       </p>
       {!isSupabaseConfigured() && (
         <p className="mt-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-900 dark:text-amber-100">

@@ -38,7 +38,7 @@ export default async function SellerMessagesPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <p className="max-w-2xl text-sm leading-relaxed text-muted">
-        Communications officielles de l’équipe BOMA (validation, consignes, alertes).
+        Communications officielles de l’équipe BOMA TCHOP (validation, consignes, alertes).
         Conservez-les comme référence pour votre activité.
       </p>
       {error ? (

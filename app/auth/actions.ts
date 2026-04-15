@@ -401,7 +401,7 @@ export async function deleteProductAction(productId: string) {
   if (count != null && count > 0) {
     return {
       error:
-        "Impossible de supprimer : ce produit figure déjà dans une ou plusieurs commandes (historique à conserver). Il peut rester « bloqué » hors marché ; contactez le support BOMA si vous devez le retirer définitivement.",
+        "Impossible de supprimer : ce produit figure déjà dans une ou plusieurs commandes (historique à conserver). Il peut rester « bloqué » hors marché ; contactez le support BOMA TCHOP si vous devez le retirer définitivement.",
     };
   }
 
@@ -1048,7 +1048,7 @@ export async function adminSendVendorMessageAction(formData: FormData) {
 
   const { error } = await supabase.from("vendor_messages").insert({
     vendor_id: vendorId,
-    title: title || "Message de l’équipe BOMA",
+    title: title || "Message de l’équipe BOMA TCHOP",
     body,
     sender_id: user.id,
   });

@@ -139,7 +139,7 @@ export function ContactForm() {
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted">
-          En envoyant, vous acceptez d’être recontacté par l’équipe BOMA.
+          En envoyant, vous acceptez d’être recontacté par l’équipe BOMA TCHOP.
         </p>
         <button
           type="button"

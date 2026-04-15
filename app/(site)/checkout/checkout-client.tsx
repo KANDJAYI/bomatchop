@@ -1,10 +1,12 @@
 "use client";
 
 import {
+  faArrowRight,
   faCircleCheck,
   faClock,
   faLayerGroup,
   faMoneyBillWave,
+  faSpinner,
   faStore,
   faTruck,
 } from "@fortawesome/free-solid-svg-icons";
@@ -15,7 +17,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   finalizeCheckoutAction,
-  recordCheckoutAbandonAction,
   type CheckoutFulfillment,
 } from "@/app/auth/actions";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -102,35 +103,35 @@ function CheckoutFinalizeHero({
         </p>
 
         <ul className="mt-7 grid gap-3 sm:grid-cols-3 sm:gap-4">
-          <li className="group relative overflow-hidden rounded-2xl border border-foreground/[0.07] bg-white/70 p-4 shadow-sm backdrop-blur-sm transition-[border-color,box-shadow] duration-300 hover:border-amber-400/35 hover:shadow-md dark:border-white/10 dark:bg-white/75 dark:hover:border-amber-400/35">
+          <li className="group relative overflow-hidden rounded-2xl border border-foreground/[0.08] bg-card/95 p-4 shadow-sm backdrop-blur-sm transition-[border-color,box-shadow] duration-300 hover:border-amber-400/35 hover:shadow-md dark:border-white/[0.08] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] dark:hover:border-amber-400/45">
             <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400/25 to-orange-400/15 text-amber-800 shadow-inner dark:from-amber-400/20 dark:to-orange-500/10 dark:text-amber-200">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400/25 to-orange-400/15 text-amber-800 shadow-inner dark:from-amber-400/25 dark:to-orange-500/15 dark:text-amber-100">
                 <FontAwesomeIcon icon={faMoneyBillWave} className="h-5 w-5" />
               </span>
               <div className="min-w-0">
-                <p className="text-sm font-semibold tracking-tight text-foreground dark:text-slate-900">
+                <p className="text-sm font-semibold tracking-tight text-foreground">
                   Paiement simple
                 </p>
-                <p className="mt-1 text-xs leading-relaxed text-muted dark:text-slate-700">
-                  Pas de carte bancaire sur BOMA : vous payez en liquide à la réception de
+                <p className="mt-1 text-xs leading-relaxed text-muted">
+                  Pas de carte bancaire sur BOMA TCHOP : vous payez en liquide à la réception de
                   vos sacs.
                 </p>
               </div>
             </div>
           </li>
-          <li className="group relative overflow-hidden rounded-2xl border border-foreground/[0.07] bg-white/70 p-4 shadow-sm backdrop-blur-sm transition-[border-color,box-shadow] duration-300 hover:border-boma-blue/35 hover:shadow-md dark:border-white/10 dark:bg-white/75 dark:hover:border-sky-400/35">
+          <li className="group relative overflow-hidden rounded-2xl border border-foreground/[0.08] bg-card/95 p-4 shadow-sm backdrop-blur-sm transition-[border-color,box-shadow] duration-300 hover:border-boma-blue/35 hover:shadow-md dark:border-white/[0.08] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] dark:hover:border-sky-400/45">
             <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-boma-blue/20 to-sky-400/10 text-boma-blue dark:from-sky-400/25 dark:to-cyan-500/10 dark:text-sky-300">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-boma-blue/20 to-sky-400/10 text-boma-blue dark:from-sky-500/30 dark:to-cyan-600/15 dark:text-sky-200">
                 <span className="flex gap-0.5" aria-hidden>
                   <FontAwesomeIcon icon={faTruck} className="h-4 w-4" />
                   <FontAwesomeIcon icon={faStore} className="h-4 w-4 opacity-80" />
                 </span>
               </span>
               <div className="min-w-0">
-                <p className="text-sm font-semibold tracking-tight text-foreground dark:text-slate-900">
+                <p className="text-sm font-semibold tracking-tight text-foreground">
                   Livraison ou retrait
                 </p>
-                <p className="mt-1 text-xs leading-relaxed text-muted dark:text-slate-700">
+                <p className="mt-1 text-xs leading-relaxed text-muted">
                   À domicile ou chez le commerce : sélectionnez l’option qui vous convient
                   dans le bloc suivant.
                 </p>
@@ -140,30 +141,30 @@ function CheckoutFinalizeHero({
           <li
             className={`relative overflow-hidden rounded-2xl border p-4 shadow-sm backdrop-blur-sm transition-[border-color,box-shadow] duration-300 sm:min-h-[6.5rem] ${
               multi
-                ? "border-boma-blue/30 bg-gradient-to-br from-boma-blue/[0.08] to-transparent hover:shadow-md hover:shadow-boma-blue/10 dark:border-sky-400/35 dark:bg-white/75 dark:from-sky-400/[0.12]"
-                : "border-foreground/[0.07] bg-white/70 hover:border-boma-forest/25 hover:shadow-md dark:border-white/10 dark:bg-white/75"
+                ? "border-boma-blue/30 bg-gradient-to-br from-boma-blue/[0.08] to-card hover:shadow-md hover:shadow-boma-blue/10 dark:border-sky-500/30 dark:from-sky-950/90 dark:to-card dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
+                : "border-foreground/[0.08] bg-card/95 hover:border-boma-forest/25 hover:shadow-md dark:border-white/[0.08] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
             }`}
           >
             <div className="flex items-start gap-3">
               <span
                 className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-inner ${
                   multi
-                    ? "bg-boma-blue text-white dark:bg-sky-500"
-                    : "bg-gradient-to-br from-boma-forest/20 to-emerald-600/10 text-boma-forest dark:from-emerald-500/25 dark:to-emerald-600/10 dark:text-emerald-200"
+                    ? "bg-boma-blue text-white dark:bg-sky-500 dark:text-white"
+                    : "bg-gradient-to-br from-boma-forest/20 to-emerald-600/10 text-boma-forest dark:from-emerald-500/30 dark:to-emerald-700/20 dark:text-emerald-100"
                 }`}
               >
                 <FontAwesomeIcon icon={faLayerGroup} className="h-5 w-5" />
               </span>
               <div className="min-w-0">
-                <p className="flex flex-wrap items-center gap-2 text-sm font-semibold tracking-tight text-foreground dark:text-slate-900">
+                <p className="flex flex-wrap items-center gap-2 text-sm font-semibold tracking-tight text-foreground">
                   {multi ? "Plusieurs commerces" : "Un seul commerce"}
                   {multi ? (
-                    <span className="rounded-md bg-boma-blue/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-boma-blue dark:bg-sky-400/20 dark:text-sky-200">
+                    <span className="rounded-md bg-boma-blue/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-boma-blue dark:bg-sky-400/25 dark:text-sky-100">
                       {vendorCount} commandes
                     </span>
                   ) : null}
                 </p>
-                <p className="mt-1 text-xs leading-relaxed text-muted dark:text-slate-700">
+                <p className="mt-1 text-xs leading-relaxed text-muted">
                   {multi
                     ? "Une commande distincte par vendeur. Retrait : un passage par magasin. Livraison : une seule adresse pour toutes."
                     : "Une seule validation suffit — le vendeur prépare votre panier."}
@@ -183,7 +184,7 @@ function CheckoutFinalizeHero({
                 Produits supermarché
               </strong>{" "}
               : la date limite et la durée avant expiration sont rappelées sur chaque
-              ligne du résumé. Les réductions (20 %, 30 % ou 50 %) suivent les règles BOMA
+              ligne du résumé. Les réductions (20 %, 30 % ou 50 %) suivent les règles BOMA TCHOP
               selon l’écart avec la DLC.
             </p>
           </div>
@@ -275,29 +276,6 @@ export function CheckoutClient() {
       "success",
     );
     router.push("/dashboard");
-  }
-
-  async function abandon() {
-    if (!isSupabaseConfigured()) {
-      showToast("Panier laissé (démo)", "info");
-      router.push("/marketplace");
-      return;
-    }
-    const r = await recordCheckoutAbandonAction();
-    if ("error" in r && r.error) {
-      showToast(r.error, "error");
-      return;
-    }
-    const data = "data" in r ? r.data : null;
-    if (data && typeof data === "object" && "level" in data) {
-      const level = (data as { level?: string }).level;
-      if (level === "warning") {
-        showToast("Abandon enregistré — évitez de répéter trop souvent.", "info");
-      }
-    } else {
-      showToast("Abandon enregistré", "info");
-    }
-    router.push("/marketplace");
   }
 
   return (
@@ -474,8 +452,8 @@ export function CheckoutClient() {
         ) : null}
         <div className="space-y-3 rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-4">
           <p className="text-sm font-medium text-foreground">Paiement</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="relative block h-[52px] w-full max-w-[240px] overflow-hidden rounded-lg">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <span className="relative block h-[52px] w-full max-w-[240px] shrink-0 self-start overflow-hidden rounded-lg sm:self-center">
               <Image
                 src="/payments/cash-delivery.webp"
                 alt=""
@@ -485,21 +463,56 @@ export function CheckoutClient() {
                 unoptimized
               />
             </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-foreground">À la livraison</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted">
+            <div className="min-w-0 w-full sm:flex-1">
+              <p className="text-sm font-semibold text-foreground sm:text-xs">
+                À la livraison
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-muted sm:text-xs">
                 Vous payez en espèces au retrait de votre commande (pas de paiement en
-                ligne sur BOMA pour l’instant).
+                ligne sur BOMA TCHOP pour l’instant).
               </p>
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <Button type="submit" variant="primary" disabled={loading}>
-            {loading ? "Validation…" : "Confirmer la commande"}
-          </Button>
-          <Button type="button" variant="secondary" disabled={loading} onClick={abandon}>
-            Abandonner (anti-fraude)
+        <div className="relative mx-auto w-full max-w-md sm:mx-0 sm:max-w-none">
+          <div
+            className="pointer-events-none absolute -inset-x-2 -bottom-2 -top-3 -z-10 rounded-[1.35rem] bg-gradient-to-r from-sky-400/35 via-boma-blue/40 to-emerald-400/30 opacity-90 blur-2xl saturate-150 dark:from-sky-500/25 dark:via-boma-blue/30 dark:to-emerald-500/20 dark:opacity-100"
+            aria-hidden
+          />
+          <Button
+            type="submit"
+            variant="cta"
+            disabled={loading}
+            className="group w-full overflow-hidden sm:w-auto sm:min-w-[17.5rem]"
+          >
+            <span
+              className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 motion-reduce:hidden motion-safe:transition motion-safe:duration-700 motion-safe:ease-out motion-safe:group-hover:translate-x-full motion-safe:group-hover:opacity-100"
+              aria-hidden
+            />
+            {loading ? (
+              <span className="relative z-10 inline-flex items-center gap-3">
+                <FontAwesomeIcon
+                  icon={faSpinner}
+                  className="h-[1.05rem] w-[1.05rem] shrink-0 animate-spin opacity-95"
+                  aria-hidden
+                />
+                <span className="tracking-wide">Validation en cours…</span>
+              </span>
+            ) : (
+              <span className="relative z-10 inline-flex w-full items-center justify-center gap-3 sm:w-auto">
+                <FontAwesomeIcon
+                  icon={faCircleCheck}
+                  className="h-[1.05rem] w-[1.05rem] shrink-0 opacity-95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]"
+                  aria-hidden
+                />
+                <span className="tracking-wide">Confirmer la commande</span>
+                <FontAwesomeIcon
+                  icon={faArrowRight}
+                  className="h-3.5 w-3.5 shrink-0 opacity-85 transition-transform duration-200 ease-out group-hover:translate-x-0.5"
+                  aria-hidden
+                />
+              </span>
+            )}
           </Button>
         </div>
       </form>
@@ -576,8 +589,16 @@ export function CheckoutClient() {
 }
 
 function WhatsappGlyph({ className }: { className?: string }) {
+  const base =
+    "block shrink-0 overflow-visible [vertical-align:middle] motion-reduce:overflow-visible";
   return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden>
+    <svg
+      className={className ? `${base} ${className}` : base}
+      viewBox="-0.35 -0.35 24.7 24.7"
+      overflow="visible"
+      aria-hidden
+      focusable="false"
+    >
       <path
         fill="currentColor"
         d="M20.52 3.48A11.84 11.84 0 0 0 12.04 0C5.5 0 .16 5.33.15 11.89c0 2.1.55 4.14 1.6 5.94L0 24l6.33-1.66a11.9 11.9 0 0 0 5.7 1.45h.01c6.54 0 11.89-5.33 11.9-11.89a11.82 11.82 0 0 0-3.42-8.42ZM12.04 21.6h-.01a9.34 9.34 0 0 1-4.77-1.31l-.34-.2-3.67.96.98-3.58-.22-.35a9.32 9.32 0 0 1-1.44-4.99c0-5.14 4.2-9.33 9.35-9.33 2.5 0 4.84.97 6.6 2.74a9.26 9.26 0 0 0 2.73 6.59c1.76 1.76 2.73 4.1 2.73 6.59 0 5.15-4.2 9.34-9.34 9.34Zm5.43-7.22c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.26-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51-.17 0-.37-.01-.57-.01-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.48 1.69.62.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41Z"
@@ -593,7 +614,7 @@ function pickupWhatsAppPrefill(group: CartVendorGroup): string {
   const tail = group.lines.length > 4 ? "\n…" : "";
   return (
     `Bonjour,\n\n` +
-    `Je passe une commande BOMA en *retrait sur place* chez *${group.vendorName}*.\n` +
+    `Je passe une commande BOMA TCHOP en *retrait sur place* chez *${group.vendorName}*.\n` +
     `Pourriez-vous me confirmer les horaires et le lieu de retrait ?\n\n` +
     `Panier : ${bits.join(", ")}${tail}\n\n` +
     `Merci !`
@@ -635,9 +656,11 @@ function PickupWhatsAppPanel({ vendorGroups }: { vendorGroups: CartVendorGroup[]
                       href={href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#20bd5a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100"
+                      className="inline-flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-semibold leading-snug text-white shadow-sm transition hover:bg-[#20bd5a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100"
                     >
-                      <WhatsappGlyph className="h-5 w-5 shrink-0" />
+                      <span className="flex size-7 shrink-0 items-center justify-center overflow-visible">
+                        <WhatsappGlyph className="size-6 text-white" />
+                      </span>
                       WhatsApp — {group.vendorName}
                     </a>
                   </li>

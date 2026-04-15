@@ -112,7 +112,7 @@ export function SellerDashboardClient({
             Bonjour — pilotage quotidien
           </p>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
-            Vue d’ensemble de votre activité sur BOMA. Détail du catalogue dans{" "}
+            Vue d’ensemble de votre activité sur BOMA TCHOP. Détail du catalogue dans{" "}
             <Link
               href="/seller/products"
               className="font-semibold text-boma-blue underline-offset-2 hover:underline dark:text-sky-400"
@@ -178,7 +178,7 @@ export function SellerDashboardClient({
         />
         <QuickCard
           href="/seller/messages"
-          title="Messages BOMA"
+          title="Messages BOMA TCHOP"
           desc="Équipe plateforme"
           accent="from-amber-500/12 to-boma-blue/8"
           icon={<IconInbox className="h-5 w-5" />}

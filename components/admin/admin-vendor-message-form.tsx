@@ -36,7 +36,7 @@ export function AdminVendorMessageForm({ vendorId }: { vendorId: string }) {
       </p>
       <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
         Le commerçant le lit dans{" "}
-        <span className="font-medium text-slate-800 dark:text-slate-200">BOMA Pro → Messages</span>.
+        <span className="font-medium text-slate-800 dark:text-slate-200">BOMA TCHOP Pro → Messages</span>.
       </p>
       <form onSubmit={onSubmit} className="mt-4 space-y-3">
         <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">

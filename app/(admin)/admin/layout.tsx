@@ -6,10 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 export const metadata: Metadata = {
   title: {
     default: "Tableau de bord",
-    template: "%s · Administration BOMA",
+    template: "%s · Administration BOMA TCHOP",
   },
   description:
-    "Espace d’administration BOMA : vendeurs, produits, commandes et clients.",
+    "Espace d’administration BOMA TCHOP : vendeurs, produits, commandes et clients.",
   robots: { index: false, follow: false },
 };
 

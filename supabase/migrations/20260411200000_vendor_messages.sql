@@ -3,7 +3,7 @@ create table public.vendor_messages (
   id uuid primary key default gen_random_uuid(),
   vendor_id uuid not null references public.vendors (id) on delete cascade,
   sender_id uuid references public.profiles (id) on delete set null,
-  title text not null default 'Message de l’équipe BOMA',
+  title text not null default 'Message de l’équipe BOMA TCHOP',
   body text not null,
   read_at timestamptz,
   created_at timestamptz not null default now()

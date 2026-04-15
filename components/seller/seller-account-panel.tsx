@@ -93,7 +93,7 @@ export function SellerAccountPanel({
             <p className="text-xs font-medium text-muted">E-mail (connexion)</p>
             <p className="mt-1 text-sm font-medium text-foreground">{email}</p>
             <p className="mt-1 text-xs text-muted">
-              Pour changer l’e-mail, contactez le support BOMA.
+              Pour changer l’e-mail, contactez le support BOMA TCHOP.
             </p>
           </div>
           {err ? (

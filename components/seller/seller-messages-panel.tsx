@@ -31,7 +31,7 @@ export function SellerMessagesPanel({ messages }: { messages: VendorMessageRow[]
         </div>
         <p className="mt-5 text-base font-semibold text-foreground">Boîte de réception vide</p>
         <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">
-          L’équipe BOMA peut vous écrire ici. Les messages importants apparaîtront dans cette
+          L’équipe BOMA TCHOP peut vous écrire ici. Les messages importants apparaîtront dans cette
           liste.
         </p>
       </div>

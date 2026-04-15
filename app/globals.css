@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/**
+ * Thème BOMA TCHOP : `ThemeProvider` bascule la classe `.dark` sur `<html>`.
+ * Par défaut, Tailwind v4 lie `dark:` à `prefers-color-scheme` seulement — sans
+ * cette variante, le texte suit les variables `.dark` mais les `dark:*` Tailwind
+ * ne s’appliquent pas → fonds clairs + texte clair (illisible).
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #0a0a0a;
@@ -11,7 +19,7 @@
   --boma-glow-blue: rgba(0, 123, 255, 0.45);
   --boma-glow-gold: rgba(228, 184, 42, 0.35);
   --boma-glow-mix: rgba(0, 123, 255, 0.22);
-  /* Palette BOMA inchangée */
+  /* Palette BOMA TCHOP inchangée */
   --boma-blue: #007bff;
   --boma-forest: #0b3d2e;
   --boma-ink: #0a0a0a;
@@ -101,7 +109,7 @@
   }
 }
 
-/* Mélange dynamique vert · jaune · rouge (+ touche bleu BOMA) */
+/* Mélange dynamique vert · jaune · rouge (+ touche bleu BOMA TCHOP) */
 @keyframes boma-spectrum-rotate {
   from {
     transform: rotate(0deg);

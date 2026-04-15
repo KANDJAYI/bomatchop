@@ -20,7 +20,7 @@ export function isRestaurantPublishWindowOpen(
   return h >= 4 && h < 22;
 }
 
-export const BOMA_RESTAURANT_PUBLISH_HOURS_FR =
+export const BOMA_TCHOP_RESTAURANT_PUBLISH_HOURS_FR =
   "Les restaurants ne peuvent mettre une offre sur le marché qu’entre 4 h et 22 h (heure locale du fuseau marché : BOMA_MARKET_TIMEZONE côté serveur, NEXT_PUBLIC_BOMA_MARKET_TIMEZONE côté interface si besoin). En dehors de cette plage, enregistrez en brouillon ou réessayez plus tard.";
 
 /** Heure locale 0–23 dans le fuseau marché (pour une date instantanée UTC). */
@@ -79,8 +79,8 @@ export function getMarketNextMidnight(
 }
 
 /** Refus rare (fenêtre publication / préparation trop tard). */
-export const BOMA_RESTAURANT_LISTING_LIMIT_FR =
-  "Ce plat ne rentre pas dans la journée BOMA : avancez l’heure de préparation ou réessayez demain matin.";
+export const BOMA_TCHOP_RESTAURANT_LISTING_LIMIT_FR =
+  "Ce plat ne rentre pas dans la journée BOMA TCHOP : avancez l’heure de préparation ou réessayez demain matin.";
 
 export type PricingEvaluation = {
   ok: boolean;
@@ -151,7 +151,7 @@ export function evaluateProductPricing(
       return {
         ok: false,
         refuseReason:
-          "L’heure de préparation doit être avant la fin de journée BOMA (minuit, fuseau marché).",
+          "L’heure de préparation doit être avant la fin de journée BOMA TCHOP (minuit, fuseau marché).",
       };
     }
     const shelfHours =
@@ -161,13 +161,13 @@ export function evaluateProductPricing(
       return {
         ok: false,
         refuseReason:
-          "Entre la préparation et la fin de journée BOMA (minuit, fuseau marché), il faut au moins 2 h.",
+          "Entre la préparation et la fin de journée BOMA TCHOP (minuit, fuseau marché), il faut au moins 2 h.",
       };
     }
     if (shelfHours > 24) {
       return {
         ok: false,
-        refuseReason: BOMA_RESTAURANT_LISTING_LIMIT_FR,
+        refuseReason: BOMA_TCHOP_RESTAURANT_LISTING_LIMIT_FR,
       };
     }
     const msUntilConsume = input.consumeBy.getTime() - now.getTime();
@@ -175,7 +175,7 @@ export function evaluateProductPricing(
     if (hoursUntilConsume < 0) {
       return {
         ok: false,
-        refuseReason: "La fin de journée BOMA est déjà passée pour aujourd’hui.",
+        refuseReason: "La fin de journée BOMA TCHOP est déjà passée pour aujourd’hui.",
       };
     }
     if (hoursUntilConsume < 2) {
@@ -189,11 +189,11 @@ export function evaluateProductPricing(
     if (input.consumeBy.getTime() >= nextMarketMidnight.getTime()) {
       return {
         ok: false,
-        refuseReason: BOMA_RESTAURANT_LISTING_LIMIT_FR,
+        refuseReason: BOMA_TCHOP_RESTAURANT_LISTING_LIMIT_FR,
       };
     }
     if (!options?.skipRestaurantPublishWindow && !isRestaurantPublishWindowOpen(now)) {
-      return { ok: false, refuseReason: BOMA_RESTAURANT_PUBLISH_HOURS_FR };
+      return { ok: false, refuseReason: BOMA_TCHOP_RESTAURANT_PUBLISH_HOURS_FR };
     }
     /* Restaurant : −20 % sur le prix catalogue lorsque l’offre est publiée (mise en ligne) entre
      * 4 h et 22 h. Hors plage autorisée, la publication est refusée (sauf brouillon avec skip).

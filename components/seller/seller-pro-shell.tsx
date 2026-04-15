@@ -54,7 +54,7 @@ function buildNavSections(approved: boolean): NavSection[] {
   };
   const messages: NavItem = {
     href: "/seller/messages",
-    label: "Messages BOMA",
+    label: "Messages BOMA TCHOP",
     icon: IconMail,
   };
   const settings: NavItem = {
@@ -206,7 +206,7 @@ export function SellerProShell({
                 Console vendeur
               </p>
               <p className="mt-0.5 truncate text-sm font-semibold text-white">
-                {vendor?.business_name ?? "BOMA Pro"}
+                {vendor?.business_name ?? "BOMA TCHOP Pro"}
               </p>
             </div>
           </div>
@@ -304,7 +304,7 @@ export function SellerProShell({
                 B
               </span>
               <span className="text-sm font-semibold tracking-tight text-foreground">
-                BOMA Pro
+                BOMA TCHOP Pro
               </span>
             </Link>
             <span

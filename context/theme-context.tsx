@@ -18,11 +18,15 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-const STORAGE_KEY = "boma-theme";
+const STORAGE_KEY = "boma-tchop-theme";
+const LEGACY_STORAGE_KEY = "boma-theme";
 
 function getInitialTheme(): Theme {
   if (typeof window === "undefined") return "light";
-  const stored = window.localStorage.getItem(STORAGE_KEY) as Theme | null;
+  const raw =
+    window.localStorage.getItem(STORAGE_KEY) ??
+    window.localStorage.getItem(LEGACY_STORAGE_KEY);
+  const stored = raw as Theme | null;
   if (stored === "light" || stored === "dark") return stored;
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
@@ -45,6 +49,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
     root.classList.toggle("dark", theme === "dark");
     window.localStorage.setItem(STORAGE_KEY, theme);
+    window.localStorage.removeItem(LEGACY_STORAGE_KEY);
   }, [theme, mounted]);
 
   const setTheme = useCallback((t: Theme) => {

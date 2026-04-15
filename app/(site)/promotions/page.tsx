@@ -4,7 +4,7 @@ import { ButtonLink } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "Promotions",
   description:
-    "Promotions et offres spéciales BOMA — anti-gaspillage alimentaire au meilleur prix.",
+    "Promotions et offres spéciales BOMA TCHOP — anti-gaspillage alimentaire au meilleur prix.",
 };
 
 export default function PromotionsPage() {

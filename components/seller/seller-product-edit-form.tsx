@@ -91,7 +91,7 @@ export function SellerProductEditForm({ product, businessType }: Props) {
             <h2 className="text-lg font-semibold tracking-tight">Modifier l’offre</h2>
             <p className="mt-1 text-sm text-muted">
               Photo facultative : laissez vide pour conserver l’image actuelle. Le prix promo
-              est recalculé selon les règles BOMA.
+              est recalculé selon les règles BOMA TCHOP.
             </p>
           </div>
           <span className="rounded-full bg-boma-forest/15 px-3 py-1 text-xs font-semibold text-boma-forest dark:text-emerald-300">

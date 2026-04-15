@@ -9,7 +9,8 @@ import {
   useState,
 } from "react";
 
-const STORAGE_KEY = "boma-favorites";
+const STORAGE_KEY = "boma-tchop-favorites";
+const LEGACY_STORAGE_KEY = "boma-favorites";
 
 type FavoritesContextValue = {
   ids: Set<string>;
@@ -22,7 +23,9 @@ const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 function loadIds(): Set<string> {
   if (typeof window === "undefined") return new Set();
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw =
+      window.localStorage.getItem(STORAGE_KEY) ??
+      window.localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!raw) return new Set();
     const arr = JSON.parse(raw) as unknown;
     if (!Array.isArray(arr)) return new Set();
@@ -45,10 +48,8 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!ready) return;
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify([...ids]),
-    );
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify([...ids]));
+    window.localStorage.removeItem(LEGACY_STORAGE_KEY);
   }, [ids, ready]);
 
   const toggle = useCallback((productId: string) => {

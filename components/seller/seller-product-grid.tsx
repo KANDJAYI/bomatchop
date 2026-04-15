@@ -60,7 +60,7 @@ export function SellerProductGrid({ products, variant = "full" }: Props) {
             Catalogue en ligne
           </h2>
           <p className="mt-1 max-w-xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-            Aperçu côté clients — prix promo conforme aux règles BOMA.
+            Aperçu côté clients — prix promo conforme aux règles BOMA TCHOP.
           </p>
         </div>
         <p className="shrink-0 rounded-full border border-zinc-200/90 bg-zinc-50 px-3 py-1 text-xs font-semibold tabular-nums text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800/80 dark:text-zinc-300">

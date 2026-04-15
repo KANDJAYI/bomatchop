@@ -1,6 +1,7 @@
--- Permet au commerçant de faire avancer le statut des commandes qui ne concernent
--- que son commerce (un seul vendor_id sur tous les articles). Les commandes
--- multi-commerces restent gérées par l’admin.
+-- Libellés produit : BOMA → BOMA TCHOP (bases déjà migrées + nouvelles installs cohérentes)
+
+alter table if exists public.vendor_messages
+  alter column title set default 'Message de l''équipe BOMA TCHOP';
 
 create or replace function public.vendor_update_order_status(
   p_order_id uuid,
@@ -112,26 +113,3 @@ begin
   raise exception 'Transition de statut non autorisée pour le commerçant.';
 end;
 $$;
-
-grant execute on function public.vendor_update_order_status(uuid, public.order_status) to authenticated;
-
--- Nombre de commerces distincts dans une commande (pour l’UI vendeur / admin)
-create or replace function public.order_distinct_vendor_count(p_order_id uuid)
-returns integer
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select coalesce(
-    (
-      select count(distinct p.vendor_id)::integer
-      from public.order_items oi
-      join public.products p on p.id = oi.product_id
-      where oi.order_id = p_order_id
-    ),
-    0
-  );
-$$;
-
-grant execute on function public.order_distinct_vendor_count(uuid) to authenticated;

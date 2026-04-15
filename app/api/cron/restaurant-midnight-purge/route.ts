@@ -70,6 +70,6 @@ export async function GET(request: Request) {
     affectedCount: blockedCount,
     blockedCount,
     message:
-      "Purge BOMA minuit : plats restaurant retirés du marché (suppression s’ils n’ont jamais été commandés, sinon statut bloqué pour conserver l’historique des commandes).",
+      "Purge BOMA TCHOP minuit : plats restaurant retirés du marché (suppression s’ils n’ont jamais été commandés, sinon statut bloqué pour conserver l’historique des commandes).",
   });
 }

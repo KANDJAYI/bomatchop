@@ -38,7 +38,7 @@ export type OrderSummary = {
   date: string;
   total: number;
   itemCount: number;
-  /** Statut BOMA (pending, paid, preparing, …) */
+  /** Statut BOMA TCHOP (pending, paid, preparing, …) */
   status: string;
 };
 

@@ -34,7 +34,7 @@ type Props = {
 };
 
 /**
- * Bloc visuel unifié pour la DLC supermarché (lisibilité + couleurs BOMA-compatibles).
+ * Bloc visuel unifié pour la DLC supermarché (lisibilité + couleurs BOMA TCHOP-compatibles).
  */
 export function SupermarketDlcBlock({
   expiresAtIso,
@@ -50,36 +50,38 @@ export function SupermarketDlcBlock({
     ? getSupermarketPublicationProgress(createdAtIso, expiresAtIso)
     : null;
 
+  /** Fonds sans « bande blanche » au centre (lisibilité mode clair). */
   const shell =
     expired
       ? [
-          "border-red-300/60 bg-gradient-to-br from-red-50/95 via-white to-orange-50/50 shadow-sm ring-1 ring-red-500/10",
-          "dark:border-red-500/35 dark:from-red-950/50 dark:via-card dark:to-orange-950/20 dark:ring-red-500/15",
+          "border-red-300/70 bg-gradient-to-br from-red-50 to-orange-50/90 shadow-sm ring-1 ring-red-500/15",
+          "dark:border-red-500/35 dark:bg-gradient-to-br dark:from-red-950/55 dark:to-orange-950/30 dark:ring-red-500/15",
         ].join(" ")
       : [
-          "border-teal-300/55 bg-gradient-to-br from-teal-50/95 via-white to-cyan-50/55 shadow-sm ring-1 ring-teal-500/[0.08]",
-          "dark:border-teal-500/30 dark:from-teal-950/55 dark:via-card dark:to-cyan-950/25 dark:ring-teal-400/10",
+          "border-teal-400/55 bg-gradient-to-br from-teal-50 to-emerald-50/90 shadow-sm ring-1 ring-teal-500/12",
+          "dark:border-teal-500/35 dark:bg-gradient-to-br dark:from-teal-950/60 dark:to-cyan-950/35 dark:ring-teal-400/12",
         ].join(" ");
 
   const iconWrap =
     expired
-      ? "bg-red-500/15 text-red-700 dark:bg-red-500/25 dark:text-red-200"
-      : "bg-teal-500/[0.18] text-teal-800 dark:bg-teal-400/20 dark:text-teal-100";
+      ? "bg-red-600/15 text-red-800 dark:bg-red-500/25 dark:text-red-100"
+      : "bg-teal-600/15 text-teal-900 dark:bg-teal-400/25 dark:text-teal-100";
 
+  /** Texte : contrastes WCAG-friendly en clair (zinc), teintes en dark. */
   const titleC =
     expired
-      ? "text-red-800/95 dark:text-red-100"
-      : "text-teal-950 dark:text-teal-50";
+      ? "text-zinc-900 dark:text-red-50"
+      : "text-zinc-900 dark:text-teal-50";
 
   const subC =
     expired
-      ? "text-red-800/85 dark:text-red-200/90"
-      : "text-teal-900/88 dark:text-teal-100/88";
+      ? "text-zinc-700 dark:text-red-100/95"
+      : "text-zinc-700 dark:text-teal-100/90";
 
   const labelC =
     expired
-      ? "text-red-700/90 dark:text-red-300/95"
-      : "text-teal-800/90 dark:text-teal-200/95";
+      ? "text-zinc-600 dark:text-red-200/95"
+      : "text-zinc-600 dark:text-teal-200/95";
 
   if (size === "lg") {
     return (
@@ -89,7 +91,7 @@ export function SupermarketDlcBlock({
         aria-label="Date limite de consommation"
       >
         <div
-          className={`pointer-events-none absolute -right-8 -top-10 h-36 w-36 rounded-full ${expired ? "bg-red-400/10" : "bg-teal-400/10"} blur-2xl dark:opacity-70`}
+          className={`pointer-events-none absolute -right-8 -top-10 h-36 w-36 rounded-full ${expired ? "bg-red-400/10" : "bg-teal-400/10"} blur-2xl opacity-40 dark:opacity-70`}
         />
         <div className="relative flex gap-4 sm:gap-5">
           <span

@@ -317,7 +317,7 @@ function VendorDossierPanel({
             </div>
           ) : (
             <p className="text-xs text-amber-700 dark:text-amber-300/90">
-              Aucune photo de profil — dossier incomplet selon les règles BOMA.
+              Aucune photo de profil — dossier incomplet selon les règles BOMA TCHOP.
             </p>
           )}
           {(v.status === "approved" || v.status === "pending" || v.status === "suspended") && (

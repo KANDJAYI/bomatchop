@@ -65,7 +65,7 @@ export async function GET(request: Request) {
     ok: true,
     affectedCount,
     message:
-      "Purge BOMA : publications supermarché retirées du marché à la fin de leur durée (suppression si jamais commandées, sinon blocage pour conserver l’historique).",
+      "Purge BOMA TCHOP : publications supermarché retirées du marché à la fin de leur durée (suppression si jamais commandées, sinon blocage pour conserver l’historique).",
   });
 }
 

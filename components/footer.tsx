@@ -99,7 +99,7 @@ export function Footer() {
           <div className="md:col-span-5">
             <div className="boma-panel boma-panel--glow rounded-3xl bg-card/80 p-6 shadow-sm ring-1 ring-foreground/[0.05] backdrop-blur-[8px] dark:bg-card/55 dark:ring-white/[0.06]">
               <p className="text-sm font-semibold text-boma-forest dark:text-white">
-                BOMA
+                BOMA TCHOP
               </p>
               <p className="mt-2 max-w-sm text-sm text-muted leading-relaxed">
                 Plateforme anti-gaspillage au Gabon : plats et produits à prix réduit,
@@ -130,7 +130,7 @@ export function Footer() {
                   <TikTokIcon className="h-5 w-5" />
                 </SocialIconLink>
                 <span className="ml-2 text-xs text-muted">
-                  Suivez BOMA au Gabon
+                  Suivez BOMA TCHOP au Gabon
                 </span>
               </div>
             </div>
@@ -180,7 +180,7 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col gap-3 border-t border-foreground/[0.06] py-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between dark:border-white/[0.08]">
           <p>
-            © {new Date().getFullYear()} BOMA. Tous droits réservés.
+            © {new Date().getFullYear()} BOMA TCHOP. Tous droits réservés.
           </p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <FooterLink href="/promotions">Offres & promos</FooterLink>

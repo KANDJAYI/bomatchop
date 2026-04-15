@@ -6,13 +6,13 @@ type LogoProps = {
   href?: string;
 };
 
-/** Marque BOMA Tchop — image `public/logobomatchop-removebg-preview.png` (fond transparent). */
+/** Marque BOMA TCHOP — image `public/logobomatchop-removebg-preview.png` (fond transparent). */
 export function Logo({ className = "", href = "/" }: LogoProps) {
   const content = (
     <span className={`inline-flex shrink-0 items-center ${className}`}>
       <Image
         src="/logobomatchop-removebg-preview.png"
-        alt="BOMA Tchop"
+        alt="BOMA TCHOP"
         width={440}
         height={158}
         className="h-[3.35rem] w-auto object-contain object-left sm:h-[3.65rem] md:h-[3.9rem]"

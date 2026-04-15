@@ -53,7 +53,7 @@ export function VendorRegisterForm() {
         <div className="space-y-3 pt-2 text-left">
           <p className="text-center text-sm text-muted leading-relaxed">
             Déposez ensuite votre dossier (identité, façade du commerce, portrait) pour
-            validation par l’équipe BOMA.
+            validation par l’équipe BOMA TCHOP.
           </p>
           <ButtonLink
             href="/auth/login?next=/auth/vendor"

@@ -56,7 +56,7 @@ export default async function SellerOrdersPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <p className="max-w-xl text-sm leading-relaxed text-muted">
+      <p className="max-w-xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
         Liste des commandes qui incluent au moins un de vos produits. Filtrez par statut,
         ouvrez le détail pour les lignes et les actions (acceptation, préparation, retrait).
       </p>

@@ -13,7 +13,7 @@ import type { Product, VendorType } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-/** Fonds parallaxe — sections « Comment ça marche » et « Pourquoi BOMA » (~4K, haute qualité) */
+/** Fonds parallaxe — sections « Comment ça marche » et « Pourquoi BOMA TCHOP » (~4K, haute qualité) */
 const stepsSectionParallaxImage =
   "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=3840&h=2160&q=95";
 const whyBomaSectionParallaxImage =
@@ -168,7 +168,7 @@ export default async function HomePage() {
               <span className="text-boma-blue">pas seulement votre budget</span>.
             </h1>
             <p className="max-w-xl text-lg text-muted leading-relaxed">
-              BOMA connecte commerces, restaurants et consommateurs pour écouler les
+              BOMA TCHOP connecte commerces, restaurants et consommateurs pour écouler les
               invendus à prix doux — une expérience premium, simple et rapide.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -341,7 +341,7 @@ export default async function HomePage() {
         overlayClassName={parallaxOverlayMid}
       >
         <h2 className="text-center text-3xl font-semibold tracking-tight [text-shadow:0_0_28px_var(--background),0_2px_12px_var(--background),0_1px_2px_rgba(0,0,0,0.12)] dark:[text-shadow:0_0_32px_rgb(0,0,0),0_2px_16px_rgb(0,0,0),0_1px_2px_rgba(0,0,0,0.5)]">
-          Pourquoi BOMA
+          Pourquoi BOMA TCHOP
         </h2>
         <div className="mt-14 grid gap-8 md:grid-cols-3">
           {benefits.map((b) => (

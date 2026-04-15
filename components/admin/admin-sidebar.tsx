@@ -69,7 +69,7 @@ export function AdminSidebar({ open, onClose }: AdminSidebarProps) {
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold tracking-tight text-white">
-              Console BOMA
+              Console BOMA TCHOP
             </p>
             <p className="text-[10px] font-medium uppercase tracking-widest text-slate-500">
               Administration

@@ -132,7 +132,7 @@ export function SellerProductCreateForm({
               className="boma-field rounded-2xl bg-background px-4 py-3"
             />
             <span className="text-xs font-normal text-muted">
-              Base avant réduction BOMA
+              Base avant réduction BOMA TCHOP
             </span>
           </label>
           <label className="flex flex-col gap-2 text-sm font-medium">

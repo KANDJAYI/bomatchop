@@ -115,7 +115,7 @@ export function buildBurgerMenuSections(
   const sellerNew = item("/seller/products/new", "Nouvelle offre", (p) =>
     p.startsWith("/seller/products/new"),
   );
-  const sellerMessages = item("/seller/messages", "Messages BOMA", (p) =>
+  const sellerMessages = item("/seller/messages", "Messages BOMA TCHOP", (p) =>
     p.startsWith("/seller/messages"),
   );
   const sellerParametres = item("/seller/parametres", "Paramètres", (p) =>
@@ -149,7 +149,7 @@ export function buildBurgerMenuSections(
       },
       {
         id: "sell",
-        title: "Vendre sur BOMA",
+        title: "Vendre sur BOMA TCHOP",
         items: [seller],
       },
       {
@@ -247,7 +247,7 @@ export function buildBurgerMenuSections(
     },
     {
       id: "sell",
-      title: "Vendre sur BOMA",
+      title: "Vendre sur BOMA TCHOP",
       items: [seller],
     },
     {

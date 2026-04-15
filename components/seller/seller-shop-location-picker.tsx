@@ -177,7 +177,7 @@ export function SellerShopLocationPicker({
       <div className="rounded-2xl border border-zinc-200/90 bg-white p-4 text-sm text-muted dark:border-zinc-800 dark:bg-zinc-900/50">
         <p>
           La modification du point sur la carte n’est pas disponible pour votre
-          statut actuel. Contactez le support BOMA si besoin.
+          statut actuel. Contactez le support BOMA TCHOP si besoin.
         </p>
         {hasSaved && (
           <p className="mt-2 font-medium text-foreground">
