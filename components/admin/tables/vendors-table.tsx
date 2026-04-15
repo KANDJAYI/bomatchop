@@ -4,8 +4,11 @@ import Image from "next/image";
 import { Fragment, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AdminVendorMessageForm } from "@/components/admin/admin-vendor-message-form";
+import { VendorSubscriptionAdminForm } from "@/components/admin/vendor-subscription-admin-form";
 import {
   adminApproveVendor,
+  adminClearVendorFieldAction,
+  adminDeleteVendorRecordAction,
   adminGetVendorDossierSignedUrls,
   adminRejectVendor,
   adminSuspendVendor,
@@ -28,6 +31,10 @@ export type VendorRow = {
   storefront_photo_url: string | null;
   profile_photo_url: string | null;
   account_email: string | null;
+  subscription_last_paid_at: string | null;
+  subscription_next_due_at: string | null;
+  subscription_note: string | null;
+  whatsapp_phone: string | null;
 };
 
 type DocCache = {
@@ -51,6 +58,46 @@ export function AdminVendorsTable({ vendors }: { vendors: VendorRow[] }) {
       const r = await fn(id);
       if (r.error) alert(r.error);
       router.refresh();
+    });
+  }
+
+  type ClearKind = "id_document" | "storefront" | "profile" | "whatsapp";
+
+  function runClearVendorField(id: string, kind: ClearKind) {
+    const labels: Record<ClearKind, string> = {
+      id_document: "la référence à la pièce d’identité",
+      storefront: "la référence à la photo de devanture",
+      profile: "la photo de profil (annonces)",
+      whatsapp: "le numéro WhatsApp retrait",
+    };
+    if (!confirm(`Retirer du dossier ${labels[kind]} ? Le fichier peut rester dans le stockage.`)) {
+      return;
+    }
+    start(async () => {
+      const fd = new FormData();
+      fd.set("vendor_id", id);
+      fd.set("kind", kind);
+      const r = await adminClearVendorFieldAction(fd);
+      if (r.error) alert(r.error);
+      else router.refresh();
+    });
+  }
+
+  function runDeleteVendorRecord(id: string) {
+    if (
+      !confirm(
+        "Supprimer définitivement ce dossier vendeur ? Irréversible. Réservé aux demandes en attente ou refusées.",
+      )
+    ) {
+      return;
+    }
+    start(async () => {
+      const r = await adminDeleteVendorRecordAction(id);
+      if (r.error) alert(r.error);
+      else {
+        setExpandedId(null);
+        router.refresh();
+      }
     });
   }
 
@@ -184,6 +231,8 @@ export function AdminVendorsTable({ vendors }: { vendors: VendorRow[] }) {
                           onApprove={() => run(adminApproveVendor, v.id)}
                           onReject={() => run(adminRejectVendor, v.id)}
                           onSuspend={() => run(adminSuspendVendor, v.id)}
+                          onClearField={(kind) => runClearVendorField(v.id, kind)}
+                          onDeleteVendorRecord={() => runDeleteVendorRecord(v.id)}
                         />
                       </td>
                     </tr>
@@ -207,6 +256,8 @@ function VendorDossierPanel({
   onApprove,
   onReject,
   onSuspend,
+  onClearField,
+  onDeleteVendorRecord,
 }: {
   vendor: VendorRow;
   docCache: DocCache | undefined;
@@ -216,6 +267,8 @@ function VendorDossierPanel({
   onApprove: () => void;
   onReject: () => void;
   onSuspend: () => void;
+  onClearField: (kind: "id_document" | "storefront" | "profile" | "whatsapp") => void;
+  onDeleteVendorRecord: () => void;
 }) {
   return (
     <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm dark:border-white/[0.08] dark:bg-[#0e1218]">
@@ -271,6 +324,30 @@ function VendorDossierPanel({
             label="Mis à jour"
             value={new Date(v.updated_at).toLocaleString("fr-FR")}
           />
+          {v.status === "approved" || v.status === "suspended" ? (
+            <>
+              <DossierField
+                label="Abonnement — dernier paiement"
+                value={
+                  v.subscription_last_paid_at
+                    ? new Date(v.subscription_last_paid_at).toLocaleDateString("fr-FR", {
+                        timeZone: "UTC",
+                      })
+                    : "—"
+                }
+              />
+              <DossierField
+                label="Abonnement — prochaine échéance"
+                value={
+                  v.subscription_next_due_at
+                    ? new Date(v.subscription_next_due_at).toLocaleDateString("fr-FR", {
+                        timeZone: "UTC",
+                      })
+                    : "—"
+                }
+              />
+            </>
+          ) : null}
           <DossierField
             label="Référence fichier — pièce d’identité"
             value={
@@ -286,6 +363,10 @@ function VendorDossierPanel({
                 {v.storefront_photo_url ?? "—"}
               </span>
             }
+          />
+          <DossierField
+            label="WhatsApp retrait (restaurants)"
+            value={v.whatsapp_phone?.trim() ? v.whatsapp_phone : "—"}
           />
         </dl>
 
@@ -320,6 +401,9 @@ function VendorDossierPanel({
               Aucune photo de profil — dossier incomplet selon les règles BOMA TCHOP.
             </p>
           )}
+          {v.status === "approved" || v.status === "suspended" ? (
+            <VendorSubscriptionAdminForm vendor={v} />
+          ) : null}
           {(v.status === "approved" || v.status === "pending" || v.status === "suspended") && (
             <AdminVendorMessageForm vendorId={v.id} />
           )}
@@ -360,6 +444,75 @@ function VendorDossierPanel({
           >
             Suspendre ce commerçant
           </button>
+        </div>
+      ) : null}
+
+      <div className="mt-6 border-t border-slate-200/90 pt-5 dark:border-white/[0.06]">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          Retirer des données du dossier
+        </p>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+          Seules les références en base sont effacées ; les fichiers peuvent rester dans le
+          stockage Supabase.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {v.id_document_url ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => onClearField("id_document")}
+              className="rounded-lg border border-amber-200/90 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-100 disabled:opacity-50 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100 dark:hover:bg-amber-500/20"
+            >
+              Supprimer réf. pièce d’identité
+            </button>
+          ) : null}
+          {v.storefront_photo_url ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => onClearField("storefront")}
+              className="rounded-lg border border-amber-200/90 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-100 disabled:opacity-50 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100 dark:hover:bg-amber-500/20"
+            >
+              Supprimer réf. devanture
+            </button>
+          ) : null}
+          {v.profile_photo_url ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => onClearField("profile")}
+              className="rounded-lg border border-amber-200/90 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-100 disabled:opacity-50 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100 dark:hover:bg-amber-500/20"
+            >
+              Supprimer portrait annonces
+            </button>
+          ) : null}
+          {v.whatsapp_phone?.trim() ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => onClearField("whatsapp")}
+              className="rounded-lg border border-amber-200/90 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-100 disabled:opacity-50 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100 dark:hover:bg-amber-500/20"
+            >
+              Supprimer WhatsApp retrait
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      {v.status === "pending" || v.status === "rejected" ? (
+        <div className="mt-6 border-t border-red-200/50 pt-5 dark:border-red-500/20">
+          <button
+            type="button"
+            disabled={pending}
+            onClick={onDeleteVendorRecord}
+            className="rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-semibold text-red-800 transition hover:bg-red-100 disabled:opacity-50 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200 dark:hover:bg-red-500/20"
+          >
+            Supprimer définitivement ce dossier
+          </button>
+          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+            Réservé aux statuts « en attente » ou « refusé ». Les produits liés sont supprimés
+            en cascade si aucune commande ne les bloque.
+          </p>
         </div>
       ) : null}
     </div>

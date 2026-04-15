@@ -473,6 +473,171 @@ export async function adminSuspendVendor(vendorId: string) {
   return { ok: true as const };
 }
 
+function parseAdminDateField(
+  raw: string,
+  label: string,
+): { ok: true; iso: string } | { ok: false; error: string } {
+  const s = raw.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    return { ok: false, error: `${label} : utilisez le format AAAA-MM-JJ.` };
+  }
+  const t = Date.parse(`${s}T12:00:00.000Z`);
+  if (Number.isNaN(t)) {
+    return { ok: false, error: `${label} : date invalide.` };
+  }
+  return { ok: true, iso: new Date(t).toISOString() };
+}
+
+/** Enregistre un paiement d’abonnement et la prochaine échéance (console admin). */
+export async function adminSetVendorSubscriptionAction(formData: FormData) {
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase non configuré." };
+
+  const vendorId = String(formData.get("vendor_id") ?? "").trim();
+  const clear = String(formData.get("clear_schedule") ?? "") === "1";
+  const paidRaw = String(formData.get("paid_at") ?? "").trim();
+  const nextRaw = String(formData.get("next_due_at") ?? "").trim();
+  const noteRaw = String(formData.get("subscription_note") ?? "").trim();
+
+  if (!vendorId) return { error: "Identifiant vendeur manquant." };
+
+  if (clear) {
+    const { error } = await supabase
+      .from("vendors")
+      .update({
+        subscription_last_paid_at: null,
+        subscription_next_due_at: null,
+        subscription_note: noteRaw.length > 0 ? noteRaw : null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", vendorId);
+    if (error) return { error: error.message };
+    revalidatePath("/admin");
+    revalidatePath("/admin/vendors");
+    revalidatePath("/admin/subscriptions");
+    return { ok: true as const };
+  }
+
+  const paid = parseAdminDateField(paidRaw, "Date du paiement");
+  if (!paid.ok) return { error: paid.error };
+  const next = parseAdminDateField(nextRaw, "Prochaine échéance");
+  if (!next.ok) return { error: next.error };
+
+  const { error } = await supabase
+    .from("vendors")
+    .update({
+      subscription_last_paid_at: paid.iso,
+      subscription_next_due_at: next.iso,
+      subscription_note: noteRaw.length > 0 ? noteRaw : null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", vendorId);
+
+  if (error) return { error: error.message };
+  revalidatePath("/admin");
+  revalidatePath("/admin/vendors");
+  revalidatePath("/admin/subscriptions");
+  return { ok: true as const };
+}
+
+/** Efface dates + note d’abonnement (sans passer par le formulaire). */
+export async function adminWipeVendorSubscriptionAction(vendorId: string) {
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase non configuré." };
+  const id = vendorId.trim();
+  if (!id) return { error: "Identifiant vendeur manquant." };
+  const { error } = await supabase
+    .from("vendors")
+    .update({
+      subscription_last_paid_at: null,
+      subscription_next_due_at: null,
+      subscription_note: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/admin");
+  revalidatePath("/admin/vendors");
+  revalidatePath("/admin/subscriptions");
+  return { ok: true as const };
+}
+
+const VENDOR_FIELD_CLEAR = {
+  id_document: "id_document_url",
+  storefront: "storefront_photo_url",
+  profile: "profile_photo_url",
+  whatsapp: "whatsapp_phone",
+} as const;
+
+type VendorFieldClearKind = keyof typeof VENDOR_FIELD_CLEAR;
+
+/** Retire une référence (URL ou texte) du dossier vendeur. */
+export async function adminClearVendorFieldAction(formData: FormData) {
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase non configuré." };
+  const vendorId = String(formData.get("vendor_id") ?? "").trim();
+  const kind = String(formData.get("kind") ?? "").trim() as VendorFieldClearKind;
+  if (!vendorId) return { error: "Identifiant vendeur manquant." };
+  const column = VENDOR_FIELD_CLEAR[kind];
+  if (!column) return { error: "Type de suppression invalide." };
+  const { error } = await supabase
+    .from("vendors")
+    .update({
+      [column]: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", vendorId);
+  if (error) return { error: error.message };
+  revalidatePath("/admin/vendors");
+  revalidatePath("/admin/subscriptions");
+  return { ok: true as const };
+}
+
+/**
+ * Supprime la ligne vendeur (cascade produits, etc.). Réservé aux statuts
+ * `pending` et `rejected` pour limiter les accidents.
+ */
+export async function adminDeleteVendorRecordAction(vendorId: string) {
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase non configuré." };
+  const id = vendorId.trim();
+  if (!id) return { error: "Identifiant vendeur manquant." };
+
+  const { data: row, error: readErr } = await supabase
+    .from("vendors")
+    .select("id, status")
+    .eq("id", id)
+    .maybeSingle();
+  if (readErr) return { error: readErr.message };
+  if (!row) return { error: "Vendeur introuvable." };
+  if (row.status !== "pending" && row.status !== "rejected") {
+    return {
+      error:
+        "Suppression de la fiche réservée aux dossiers « en attente » ou « refusés ». Pour un commerce approuvé ou suspendu, utilisez « Suspendre » ou traitez les commandes liées avant une suppression en base.",
+    };
+  }
+
+  const { error, data } = await supabase.from("vendors").delete().eq("id", id).select("id");
+  if (error) {
+    const msg = error.message ?? "";
+    if (
+      msg.toLowerCase().includes("foreign key") ||
+      msg.includes("violates foreign key")
+    ) {
+      return {
+        error:
+          "Suppression impossible : des enregistrements sont encore liés (ex. commandes).",
+      };
+    }
+    return { error: msg };
+  }
+  if (!data?.length) return { error: "Aucune ligne supprimée." };
+  revalidatePath("/admin");
+  revalidatePath("/admin/vendors");
+  revalidatePath("/admin/subscriptions");
+  return { ok: true as const };
+}
+
 /** URLs signées bucket privé `vendor-documents` (réservé admin via RLS). */
 export async function adminGetVendorDossierSignedUrls(vendorId: string) {
   const supabase = await createClient();

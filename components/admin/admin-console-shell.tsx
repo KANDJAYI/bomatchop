@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import {
+  AdminSubscriptionAlerts,
+  type AdminSubscriptionAlert,
+} from "@/components/admin/admin-subscription-alerts";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminTopbar } from "@/components/admin/admin-topbar";
 
@@ -8,12 +12,14 @@ type AdminConsoleShellProps = {
   children: React.ReactNode;
   userEmail: string;
   displayName: string | null;
+  subscriptionAlerts?: AdminSubscriptionAlert[];
 };
 
 export function AdminConsoleShell({
   children,
   userEmail,
   displayName,
+  subscriptionAlerts = [],
 }: AdminConsoleShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -29,6 +35,7 @@ export function AdminConsoleShell({
           userEmail={userEmail}
           displayName={displayName}
         />
+        <AdminSubscriptionAlerts alerts={subscriptionAlerts} />
         <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 lg:p-8">
           {children}
         </main>

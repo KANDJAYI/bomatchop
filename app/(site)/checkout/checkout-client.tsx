@@ -588,22 +588,20 @@ export function CheckoutClient() {
   );
 }
 
-function WhatsappGlyph({ className }: { className?: string }) {
-  const base =
-    "block shrink-0 overflow-visible [vertical-align:middle] motion-reduce:overflow-visible";
+function CheckoutWhatsAppIcon({ variant }: { variant: "panel" | "button" }) {
+  const cls =
+    variant === "panel"
+      ? "size-11 shrink-0 self-start rounded-xl object-contain shadow-md shadow-emerald-900/20 ring-1 ring-black/10 dark:ring-white/10"
+      : "size-7 shrink-0 rounded-md object-contain";
   return (
-    <svg
-      className={className ? `${base} ${className}` : base}
-      viewBox="-0.35 -0.35 24.7 24.7"
-      overflow="visible"
-      aria-hidden
-      focusable="false"
-    >
-      <path
-        fill="currentColor"
-        d="M20.52 3.48A11.84 11.84 0 0 0 12.04 0C5.5 0 .16 5.33.15 11.89c0 2.1.55 4.14 1.6 5.94L0 24l6.33-1.66a11.9 11.9 0 0 0 5.7 1.45h.01c6.54 0 11.89-5.33 11.9-11.89a11.82 11.82 0 0 0-3.42-8.42ZM12.04 21.6h-.01a9.34 9.34 0 0 1-4.77-1.31l-.34-.2-3.67.96.98-3.58-.22-.35a9.32 9.32 0 0 1-1.44-4.99c0-5.14 4.2-9.33 9.35-9.33 2.5 0 4.84.97 6.6 2.74a9.26 9.26 0 0 0 2.73 6.59c1.76 1.76 2.73 4.1 2.73 6.59 0 5.15-4.2 9.34-9.34 9.34Zm5.43-7.22c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.26-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51-.17 0-.37-.01-.57-.01-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.48 1.69.62.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41Z"
-      />
-    </svg>
+    <Image
+      src="/whatsapp.jpeg"
+      alt=""
+      width={256}
+      height={256}
+      className={cls}
+      sizes={variant === "panel" ? "44px" : "28px"}
+    />
   );
 }
 
@@ -633,9 +631,7 @@ function PickupWhatsAppPanel({ vendorGroups }: { vendorGroups: CartVendorGroup[]
   return (
     <div className="rounded-2xl border border-emerald-600/25 bg-gradient-to-br from-emerald-500/[0.08] via-transparent to-boma-blue/[0.04] p-4 shadow-sm ring-1 ring-emerald-600/10 dark:border-emerald-400/20 dark:from-emerald-400/[0.07] dark:ring-emerald-400/15 sm:p-5">
       <div className="flex gap-3 sm:gap-4">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center self-start rounded-xl bg-[#25D366] text-white shadow-md shadow-emerald-900/20">
-          <WhatsappGlyph className="h-6 w-6" />
-        </span>
+        <CheckoutWhatsAppIcon variant="panel" />
         <div className="min-w-0 flex-1 space-y-3">
           <div>
             <h3 className="text-sm font-semibold tracking-tight text-foreground">
@@ -658,9 +654,7 @@ function PickupWhatsAppPanel({ vendorGroups }: { vendorGroups: CartVendorGroup[]
                       rel="noopener noreferrer"
                       className="inline-flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#25D366] px-4 py-3 text-sm font-semibold leading-snug text-white shadow-sm transition hover:bg-[#20bd5a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99] motion-reduce:transition-none motion-reduce:active:scale-100"
                     >
-                      <span className="flex size-7 shrink-0 items-center justify-center overflow-visible">
-                        <WhatsappGlyph className="size-6 text-white" />
-                      </span>
+                      <CheckoutWhatsAppIcon variant="button" />
                       WhatsApp — {group.vendorName}
                     </a>
                   </li>

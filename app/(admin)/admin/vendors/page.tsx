@@ -11,6 +11,10 @@ type VendorQueryRow = Omit<VendorRow, "account_email"> & {
   profiles: { email: string | null } | { email: string | null }[] | null;
   /** Absent si la migration `profile_photo_url` n’a pas été appliquée. */
   profile_photo_url?: string | null;
+  subscription_last_paid_at?: string | null;
+  subscription_next_due_at?: string | null;
+  subscription_note?: string | null;
+  whatsapp_phone?: string | null;
 };
 
 function profileEmail(
@@ -42,6 +46,29 @@ export default async function AdminVendorsPage() {
       id_document_url,
       storefront_photo_url,
       profile_photo_url,
+      subscription_last_paid_at,
+      subscription_next_due_at,
+      subscription_note,
+      whatsapp_phone,
+      profiles ( email )
+    `;
+
+  const selectWithPhotoNoSub = `
+      id,
+      user_id,
+      business_name,
+      business_type,
+      status,
+      created_at,
+      updated_at,
+      first_name,
+      last_name,
+      phone,
+      location,
+      id_document_url,
+      storefront_photo_url,
+      profile_photo_url,
+      whatsapp_phone,
       profiles ( email )
     `;
 
@@ -59,6 +86,7 @@ export default async function AdminVendorsPage() {
       location,
       id_document_url,
       storefront_photo_url,
+      whatsapp_phone,
       profiles ( email )
     `;
 
@@ -71,6 +99,17 @@ export default async function AdminVendorsPage() {
   let data = first.data as VendorQueryRow[] | null;
   let error = first.error;
   let migrationHint = false;
+
+  if (error && isUndefinedColumnError(error.message, "subscription_next_due_at")) {
+    const sub = await supabase
+      .from("vendors")
+      .select(selectWithPhotoNoSub)
+      .in("status", ["pending", "approved", "suspended", "rejected"])
+      .order("created_at", { ascending: false });
+    data = sub.data as VendorQueryRow[] | null;
+    error = sub.error;
+  }
+
   if (error && isUndefinedColumnError(error.message, "profile_photo_url")) {
     migrationHint = true;
     const second = await supabase
@@ -96,6 +135,10 @@ export default async function AdminVendorsPage() {
     return {
       ...rest,
       profile_photo_url: r.profile_photo_url ?? null,
+      subscription_last_paid_at: r.subscription_last_paid_at ?? null,
+      subscription_next_due_at: r.subscription_next_due_at ?? null,
+      subscription_note: r.subscription_note ?? null,
+      whatsapp_phone: r.whatsapp_phone ?? null,
       account_email: profileEmail(profiles),
     };
   });
@@ -108,7 +151,8 @@ export default async function AdminVendorsPage() {
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Ouvrez chaque dossier pour consulter les informations et les pièces jointes
-          avant d’approuver ou de refuser une demande.
+          avant d’approuver ou de refuser une demande. Pour les commerces approuvés,
+          enregistrez aussi les paiements d’abonnement et les prochaines échéances.
         </p>
         {migrationHint ? (
           <p className="mt-3 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-950 dark:text-amber-100">

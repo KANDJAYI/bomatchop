@@ -40,10 +40,33 @@ export default async function AdminSectionLayout({
     redirect("/");
   }
 
+  const horizon = new Date();
+  horizon.setUTCDate(horizon.getUTCDate() + 14);
+
+  let subscriptionAlerts: {
+    id: string;
+    business_name: string;
+    subscription_next_due_at: string;
+  }[] = [];
+
+  const subRes = await supabase
+    .from("vendors")
+    .select("id, business_name, subscription_next_due_at")
+    .eq("status", "approved")
+    .not("subscription_next_due_at", "is", null)
+    .lte("subscription_next_due_at", horizon.toISOString())
+    .order("subscription_next_due_at", { ascending: true })
+    .limit(40);
+
+  if (!subRes.error && subRes.data) {
+    subscriptionAlerts = subRes.data as typeof subscriptionAlerts;
+  }
+
   return (
     <AdminConsoleShell
       userEmail={user.email}
       displayName={profile?.full_name ?? null}
+      subscriptionAlerts={subscriptionAlerts}
     >
       {children}
     </AdminConsoleShell>

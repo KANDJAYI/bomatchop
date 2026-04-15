@@ -15,6 +15,11 @@ const nav = [
     icon: IconStore,
   },
   {
+    href: "/admin/subscriptions",
+    label: "Abonnements",
+    icon: IconSubscription,
+  },
+  {
     href: "/admin/products",
     label: "Produits",
     icon: IconBox,
@@ -127,6 +132,18 @@ function IconStore({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+    </svg>
+  );
+}
+
+function IconSubscription({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+      />
     </svg>
   );
 }
