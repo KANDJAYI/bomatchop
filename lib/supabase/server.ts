@@ -2,8 +2,15 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { cache } from "react";
 
-export async function createClient(): Promise<SupabaseClient | null> {
+/**
+ * IMPORTANT: request-scoped memoization.
+ * Next/React can run server components in parallel; creating multiple Supabase
+ * server clients concurrently can cause auth cookie lock contention.
+ */
+export const createClient = cache(
+  async (): Promise<SupabaseClient | null> => {
   if (!isSupabaseConfigured()) {
     return null;
   }
@@ -29,4 +36,5 @@ export async function createClient(): Promise<SupabaseClient | null> {
       },
     },
   });
-}
+},
+);
