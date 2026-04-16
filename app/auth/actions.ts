@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import {
   applyDiscountPercent,
   evaluateProductPricing,
@@ -132,6 +133,81 @@ export async function registerVendorAction(
   return {
     message:
       "Compte commerçant créé. Si la confirmation e-mail est activée, validez le lien reçu puis déposez votre dossier (pièces et photos).",
+  };
+}
+
+/**
+ * Crée un utilisateur Auth + profil avec rôle `admin` (API Admin, service role).
+ * Protégé par `CREATE_ADMIN_SECRET` dans .env.local — ne jamais exposer la service role au client.
+ */
+export async function createAdminAccountAction(
+  _prev: { error?: string; message?: string } | null,
+  formData: FormData,
+): Promise<{ error?: string; message?: string }> {
+  const expectedSecret = process.env.CREATE_ADMIN_SECRET?.trim();
+  if (!expectedSecret) {
+    return {
+      error:
+        "CREATE_ADMIN_SECRET n’est pas défini dans .env.local. Ajoutez une phrase secrète longue, puis redémarrez le serveur.",
+    };
+  }
+  const setupSecret = String(formData.get("setup_secret") ?? "").trim();
+  if (setupSecret !== expectedSecret) {
+    return { error: "Clé de configuration incorrecte." };
+  }
+
+  const admin = createServiceRoleClient();
+  if (!admin) {
+    return {
+      error:
+        "Client service role indisponible : vérifiez NEXT_PUBLIC_SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY dans .env.local.",
+    };
+  }
+
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const password = String(formData.get("password") ?? "");
+  const full_name = String(formData.get("full_name") ?? "").trim();
+  if (!email || !password) {
+    return { error: "E-mail et mot de passe requis." };
+  }
+  if (password.length < 8) {
+    return { error: "Mot de passe : au moins 8 caractères." };
+  }
+  if (full_name.length < 2) {
+    return { error: "Indiquez un nom affiché (au moins 2 caractères)." };
+  }
+
+  const { data: created, error: createErr } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { full_name },
+  });
+  if (createErr) return { error: createErr.message };
+  const userId = created.user?.id;
+  if (!userId) {
+    return { error: "Création utilisateur sans identifiant — vérifiez les logs Supabase." };
+  }
+
+  const { error: profileErr } = await admin
+    .from("profiles")
+    .update({
+      role: "admin",
+      full_name,
+      email,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", userId);
+
+  if (profileErr) {
+    return {
+      error: `Compte créé mais mise à jour du profil en échec : ${profileErr.message}. Corrigez le rôle en SQL : update public.profiles set role = 'admin' where id = '${userId}';`,
+    };
+  }
+
+  revalidatePath("/", "layout");
+  return {
+    message: `Administrateur créé pour ${email}. Connectez-vous sur /auth/login puis supprimez ou désactivez cette page en production.`,
   };
 }
 
